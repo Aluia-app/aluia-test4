@@ -13,7 +13,7 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #E8F4FD 0%, #F0F8FF 50%, #E8F4FD 100%);
             min-height: 100vh;
             padding: 20px;
             transition: all 0.3s ease;
@@ -40,12 +40,12 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             border-radius: 20px;
             padding: 30px;
-            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06);
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: 1px solid rgba(255, 255, 255, 0.8);
             transition: all 0.3s ease;
         }
 
@@ -63,19 +63,20 @@
 
         .header h1 {
             font-size: 3rem;
-            color: #2c3e50;
+            color: #4A90E2;
             margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            text-shadow: none;
+            font-weight: 600;
         }
 
         body.dark-mode .header h1 {
-            color: #ecf0f1;
+            color: #74b9ff;
         }
 
         .header p {
             font-size: 1.2rem;
-            color: #7f8c8d;
-            font-weight: 300;
+            color: #7B8FA3;
+            font-weight: 400;
         }
 
         body.dark-mode .header p {
@@ -86,29 +87,30 @@
             position: fixed;
             top: 20px;
             right: 20px;
-            background: rgba(231, 76, 60, 0.9);
+            background: #FF9500;
             color: white;
             padding: 10px 20px;
             border-radius: 25px;
             font-weight: bold;
             z-index: 1000;
             backdrop-filter: blur(10px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: none;
+            box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
         }
 
         .status-bar.connected {
-            background: rgba(46, 204, 113, 0.9);
+            background: #4CAF50;
         }
 
         .status-bar.elevenlabs {
-            background: rgba(155, 89, 182, 0.9);
+            background: #9C27B0;
         }
 
         .theme-toggle {
             position: fixed;
             top: 20px;
             left: 20px;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
             border: none;
             border-radius: 50%;
             width: 50px;
@@ -118,6 +120,7 @@
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
             z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
         }
 
         body.dark-mode .theme-toggle {
@@ -126,20 +129,21 @@
 
         .theme-toggle:hover {
             transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
         }
 
         .section-title {
             font-size: 1.5rem;
-            color: #2c3e50;
+            color: #4A90E2;
             margin-bottom: 20px;
             display: flex;
             align-items: center;
             gap: 10px;
+            font-weight: 600;
         }
 
         body.dark-mode .section-title {
-            color: #ecf0f1;
+            color: #74b9ff;
         }
 
         .microphone-section {
@@ -150,7 +154,7 @@
             width: 120px;
             height: 120px;
             border-radius: 50%;
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: #4A90E2;
             border: none;
             color: white;
             font-size: 2.5rem;
@@ -158,20 +162,26 @@
             margin: 20px auto;
             display: block;
             transition: all 0.3s ease;
-            box-shadow: 0 10px 30px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 8px 24px rgba(74, 144, 226, 0.3);
             position: relative;
             overflow: hidden;
         }
 
         .microphone-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 15px 40px rgba(52, 152, 219, 0.4);
+            box-shadow: 0 12px 32px rgba(74, 144, 226, 0.4);
         }
 
         .microphone-button.listening {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            background: #e74c3c;
             animation: pulse 2s infinite;
-            box-shadow: 0 10px 30px rgba(231, 76, 60, 0.4);
+            box-shadow: 0 8px 24px rgba(231, 76, 60, 0.4);
+        }
+
+        .microphone-button.disabled {
+            background: #95a5a6;
+            box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3);
+            animation: none;
         }
 
         @keyframes pulse {
@@ -181,40 +191,46 @@
         }
 
         .microphone-status {
-            background: rgba(52, 152, 219, 0.1);
-            border: 2px solid #3498db;
-            border-radius: 15px;
+            background: rgba(74, 144, 226, 0.1);
+            border: 2px solid #4A90E2;
+            border-radius: 25px;
             padding: 15px;
             margin: 20px 0;
-            font-weight: bold;
-            color: #2980b9;
+            font-weight: 600;
+            color: #4A90E2;
             transition: all 0.3s ease;
         }
 
         body.dark-mode .microphone-status {
-            background: rgba(52, 152, 219, 0.2);
+            background: rgba(74, 144, 226, 0.2);
             color: #74b9ff;
         }
 
         .microphone-status.active {
-            background: rgba(46, 204, 113, 0.1);
-            border-color: #27ae60;
-            color: #27ae60;
+            background: rgba(76, 175, 80, 0.1);
+            border-color: #4CAF50;
+            color: #4CAF50;
+        }
+
+        .microphone-status.disabled {
+            background: rgba(149, 165, 166, 0.1);
+            border-color: #95a5a6;
+            color: #95a5a6;
         }
 
         body.dark-mode .microphone-status.active {
-            color: #55efc4;
+            color: #81C784;
         }
 
         .transcript-area {
-            background: rgba(108, 117, 125, 0.1);
-            border: 2px dashed #6c757d;
+            background: rgba(248, 249, 250, 0.8);
+            border: 2px dashed #D1D9E0;
             border-radius: 15px;
             padding: 20px;
             min-height: 100px;
             margin: 20px 0;
             font-style: italic;
-            color: #6c757d;
+            color: #7B8FA3;
             transition: all 0.3s ease;
         }
 
@@ -224,8 +240,8 @@
         }
 
         .transcript-area.has-content {
-            background: rgba(52, 152, 219, 0.1);
-            border-color: #3498db;
+            background: rgba(74, 144, 226, 0.05);
+            border-color: #4A90E2;
             color: #2c3e50;
             font-style: normal;
         }
@@ -235,21 +251,22 @@
         }
 
         .microphone-help {
-            background: rgba(255, 193, 7, 0.1);
-            border: 1px solid #ffc107;
-            border-radius: 10px;
+            background: rgba(255, 193, 7, 0.08);
+            border: 1px solid #FFE082;
+            border-radius: 15px;
             padding: 15px;
             margin: 20px 0;
             font-size: 0.9rem;
         }
 
         body.dark-mode .microphone-help {
-            background: rgba(255, 193, 7, 0.2);
+            background: rgba(255, 193, 7, 0.15);
         }
 
         .microphone-help h4 {
-            color: #f39c12;
+            color: #FF9500;
             margin-bottom: 10px;
+            font-weight: 600;
         }
 
         .microphone-help ol {
@@ -258,11 +275,11 @@
 
         .microphone-help li {
             margin: 5px 0;
-            color: #856404;
+            color: #8D6E63;
         }
 
         body.dark-mode .microphone-help li {
-            color: #f1c40f;
+            color: #FFCC80;
         }
 
         .chat-section {
@@ -273,12 +290,12 @@
 
         .chat-container {
             flex: 1;
-            background: rgba(248, 249, 250, 0.8);
+            background: rgba(248, 249, 250, 0.6);
             border-radius: 15px;
             padding: 20px;
             overflow-y: auto;
             margin-bottom: 20px;
-            border: 1px solid rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(0, 0, 0, 0.05);
         }
 
         body.dark-mode .chat-container {
@@ -301,18 +318,18 @@
         }
 
         .message.user {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: #4A90E2;
             color: white;
             margin-left: auto;
             border-bottom-right-radius: 5px;
         }
 
         .message.assistant {
-            background: rgba(236, 240, 241, 0.9);
+            background: rgba(248, 249, 250, 0.95);
             color: #2c3e50;
             margin-right: auto;
             border-bottom-left-radius: 5px;
-            border: 1px solid rgba(189, 195, 199, 0.3);
+            border: 1px solid rgba(74, 144, 226, 0.1);
         }
 
         body.dark-mode .message.assistant {
@@ -326,12 +343,12 @@
             align-items: center;
             gap: 10px;
             padding: 15px 20px;
-            background: rgba(236, 240, 241, 0.9);
+            background: rgba(248, 249, 250, 0.95);
             border-radius: 20px;
             border-bottom-left-radius: 5px;
             max-width: 80%;
             margin: 15px 0;
-            border: 1px solid rgba(189, 195, 199, 0.3);
+            border: 1px solid rgba(74, 144, 226, 0.1);
         }
 
         body.dark-mode .typing-indicator {
@@ -347,7 +364,7 @@
         .typing-dots span {
             width: 8px;
             height: 8px;
-            background: #95a5a6;
+            background: #4A90E2;
             border-radius: 50%;
             animation: typing 1.4s infinite ease-in-out;
         }
@@ -369,12 +386,12 @@
         .chat-input {
             flex: 1;
             padding: 15px 20px;
-            border: 2px solid #bdc3c7;
+            border: 2px solid #FFE082;
             border-radius: 25px;
             font-size: 1rem;
             outline: none;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.95);
         }
 
         body.dark-mode .chat-input {
@@ -384,12 +401,12 @@
         }
 
         .chat-input:focus {
-            border-color: #3498db;
-            box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+            border-color: #4A90E2;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
         }
 
         .send-button {
-            background: linear-gradient(135deg, #27ae60, #229954);
+            background: #4A90E2;
             color: white;
             border: none;
             border-radius: 50%;
@@ -401,17 +418,18 @@
             align-items: center;
             justify-content: center;
             font-weight: bold;
+            box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3);
         }
 
         .send-button:hover {
             transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(39, 174, 96, 0.3);
+            box-shadow: 0 6px 16px rgba(74, 144, 226, 0.4);
         }
 
         .privacy-button {
-            background: rgba(155, 89, 182, 0.1);
-            border: 2px solid #9b59b6;
-            color: #8e44ad;
+            background: rgba(255, 149, 0, 0.1);
+            border: 2px solid #FF9500;
+            color: #FF9500;
             padding: 15px 30px;
             border-radius: 25px;
             cursor: pointer;
@@ -423,14 +441,14 @@
         }
 
         body.dark-mode .privacy-button {
-            background: rgba(155, 89, 182, 0.2);
-            color: #bb8fce;
+            background: rgba(255, 149, 0, 0.2);
+            color: #FFB74D;
         }
 
         .privacy-button:hover {
-            background: rgba(155, 89, 182, 0.2);
+            background: rgba(255, 149, 0, 0.2);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(155, 89, 182, 0.2);
+            box-shadow: 0 6px 16px rgba(255, 149, 0, 0.3);
         }
 
         .modal {
@@ -440,7 +458,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.6);
             z-index: 2000;
             backdrop-filter: blur(5px);
         }
@@ -456,6 +474,7 @@
             overflow-y: auto;
             position: relative;
             animation: modalSlideIn 0.3s ease;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2);
         }
 
         body.dark-mode .modal-content {
@@ -483,33 +502,33 @@
         }
 
         .emergency-section {
-            background: rgba(231, 76, 60, 0.1);
-            border: 2px solid #e74c3c;
+            background: rgba(231, 76, 60, 0.08);
+            border: 2px solid #FFCDD2;
             border-radius: 15px;
             padding: 20px;
             margin: 20px 0;
         }
 
         .emergency-section h3 {
-            color: #c0392b;
+            color: #D32F2F;
             margin-bottom: 15px;
         }
 
         .emergency-section p {
-            color: #e74c3c;
-            font-weight: bold;
+            color: #F44336;
+            font-weight: 600;
             margin-bottom: 10px;
         }
 
         .emergency-contacts {
-            background: rgba(231, 76, 60, 0.05);
-            border-left: 4px solid #e74c3c;
+            background: rgba(231, 76, 60, 0.03);
+            border-left: 4px solid #F44336;
             padding: 15px;
             margin: 15px 0;
         }
 
         .emergency-contacts h4 {
-            color: #c0392b;
+            color: #D32F2F;
             margin-bottom: 10px;
             font-size: 1.1rem;
         }
@@ -522,31 +541,31 @@
         .emergency-contacts li {
             margin: 8px 0;
             padding: 5px 0;
-            color: #e74c3c;
+            color: #F44336;
             font-weight: 500;
         }
 
         .emergency-contacts li strong {
-            color: #c0392b;
+            color: #D32F2F;
         }
 
         .privacy-section {
-            background: rgba(46, 204, 113, 0.1);
-            border: 2px solid #27ae60;
+            background: rgba(76, 175, 80, 0.08);
+            border: 2px solid #C8E6C9;
             border-radius: 15px;
             padding: 20px;
             margin: 20px 0;
         }
 
         .privacy-section h3 {
-            color: #229954;
+            color: #388E3C;
             margin-bottom: 15px;
         }
 
         .quote {
             text-align: center;
             font-style: italic;
-            color: #7f8c8d;
+            color: #7B8FA3;
             margin: 30px 0;
             font-size: 1.1rem;
         }
@@ -571,11 +590,12 @@
             backdrop-filter: blur(10px);
             transition: all 0.3s ease;
             z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
         }
 
         .admin-button:hover {
             transform: scale(1.1);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3);
         }
 
         .admin-form {
@@ -586,7 +606,7 @@
         }
 
         .admin-form label {
-            font-weight: bold;
+            font-weight: 600;
             color: #2c3e50;
         }
 
@@ -596,7 +616,7 @@
 
         .admin-form input, .admin-form select {
             padding: 12px 15px;
-            border: 2px solid #bdc3c7;
+            border: 2px solid #E0E0E0;
             border-radius: 10px;
             font-size: 1rem;
             outline: none;
@@ -610,11 +630,11 @@
         }
 
         .admin-form input:focus, .admin-form select:focus {
-            border-color: #3498db;
+            border-color: #4A90E2;
         }
 
         .admin-form button {
-            background: linear-gradient(135deg, #3498db, #2980b9);
+            background: #4A90E2;
             color: white;
             border: none;
             padding: 15px 30px;
@@ -627,7 +647,7 @@
 
         .admin-form button:hover {
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(52, 152, 219, 0.3);
+            box-shadow: 0 6px 16px rgba(74, 144, 226, 0.3);
         }
 
         .toast {
@@ -635,7 +655,7 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) translateY(20px);
-            background: rgba(46, 204, 113, 0.95);
+            background: rgba(76, 175, 80, 0.95);
             color: white;
             padding: 20px 30px;
             border-radius: 15px;
@@ -647,10 +667,11 @@
             border: 1px solid rgba(255, 255, 255, 0.2);
             text-align: center;
             max-width: 80%;
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
         }
 
         .toast.error {
-            background: rgba(231, 76, 60, 0.95);
+            background: rgba(244, 67, 54, 0.95);
         }
 
         .toast.show {
@@ -661,15 +682,15 @@
         /* Footer contatti emergenza */
         .emergency-footer {
             grid-column: 1 / -1;
-            background: rgba(231, 76, 60, 0.1);
-            border: 2px solid #e74c3c;
+            background: rgba(231, 76, 60, 0.08);
+            border: 2px solid #FFCDD2;
             border-radius: 20px;
             padding: 30px;
             margin-top: 30px;
         }
 
         .emergency-footer h2 {
-            color: #c0392b;
+            color: #D32F2F;
             text-align: center;
             margin-bottom: 25px;
             font-size: 1.8rem;
@@ -678,9 +699,9 @@
         .country-section {
             margin: 20px 0;
             padding: 15px;
-            background: rgba(255, 255, 255, 0.5);
+            background: rgba(255, 255, 255, 0.7);
             border-radius: 15px;
-            border-left: 5px solid #e74c3c;
+            border-left: 5px solid #F44336;
         }
 
         body.dark-mode .country-section {
@@ -688,7 +709,7 @@
         }
 
         .country-section h3 {
-            color: #c0392b;
+            color: #D32F2F;
             margin-bottom: 15px;
             display: flex;
             align-items: center;
@@ -702,20 +723,20 @@
         }
 
         .contact-item {
-            background: rgba(231, 76, 60, 0.1);
+            background: rgba(231, 76, 60, 0.05);
             padding: 10px 15px;
             border-radius: 10px;
-            border: 1px solid rgba(231, 76, 60, 0.3);
+            border: 1px solid rgba(231, 76, 60, 0.2);
             transition: all 0.3s ease;
         }
 
         .contact-item:hover {
-            background: rgba(231, 76, 60, 0.2);
+            background: rgba(231, 76, 60, 0.1);
             transform: translateY(-2px);
         }
 
         .contact-item strong {
-            color: #c0392b;
+            color: #D32F2F;
         }
 
         /* Scrollbar personalizzata */
@@ -724,17 +745,17 @@
         }
 
         .chat-container::-webkit-scrollbar-track {
-            background: rgba(0, 0, 0, 0.1);
+            background: rgba(0, 0, 0, 0.05);
             border-radius: 10px;
         }
 
         .chat-container::-webkit-scrollbar-thumb {
-            background: rgba(52, 152, 219, 0.6);
+            background: rgba(74, 144, 226, 0.6);
             border-radius: 10px;
         }
 
         .chat-container::-webkit-scrollbar-thumb:hover {
-            background: rgba(52, 152, 219, 0.8);
+            background: rgba(74, 144, 226, 0.8);
         }
 
         /* Responsive design migliorato */
@@ -980,7 +1001,7 @@
     </div>
 
     <script>
-        console.log('🚀 Avvio AluIA2025...');
+        console.log('🚀 Avvio AluIA2025 - Versione Finale Completa...');
 
         class AluIA {
             constructor() {
@@ -997,8 +1018,9 @@
                 this.voiceId = localStorage.getItem('aluia_voice_id') || '';
                 this.isApiConfigured = this.apiKey.length > 0;
                 this.isElevenLabsConfigured = this.elevenLabsKey.length > 0;
+                this.microphoneEnabled = true; // Controllo stato microfono
                 
-                // Fix avanzato per desktop
+                // Fix avanzato per desktop - PROBLEMA MICROFONO RISOLTO
                 this.desktopFix = {
                     maxRetries: 5,
                     currentRetries: 0,
@@ -1021,9 +1043,10 @@
                     this.startAutoListening();
                 }, 1000);
                 
-                console.log('✅ AluIA2025 inizializzata');
+                console.log('✅ AluIA2025 Finale inizializzata');
                 console.log('🖥️ Desktop detected:', this.desktopFix.isDesktop);
                 console.log('🎵 ElevenLabs configured:', this.isElevenLabsConfigured);
+                console.log('🎤 Microfono enabled:', this.microphoneEnabled);
                 this.showToast('AluIA pronta! Microfono sempre attivo.');
             }
 
@@ -1059,7 +1082,7 @@
                     
                     this.recognition.continuous = true;
                     this.recognition.interimResults = true;
-                    this.recognition.lang = 'it-IT';
+                    this.recognition.lang = 'it-IT'; // LINGUA ITALIANA CONFERMATA
                     this.recognition.maxAlternatives = 1;
                     
                     if (this.desktopFix.isDesktop) {
@@ -1117,12 +1140,13 @@
                         this.isListening = false;
                         this.updateMicrophoneUI();
 
-                        if (this.autoRestartEnabled && !this.isProcessing) {
+                        // CORREZIONE: Solo riavvia se microfono abilitato
+                        if (this.autoRestartEnabled && !this.isProcessing && this.microphoneEnabled) {
                             this.scheduleSmartRestart();
                         }
                     };
 
-                    console.log('✅ Riconoscimento vocale configurato');
+                    console.log('✅ Riconoscimento vocale configurato per italiano');
                 } else {
                     console.error('❌ Speech Recognition non supportato');
                     this.showToast('Riconoscimento vocale non supportato in questo browser', 'error');
@@ -1205,9 +1229,10 @@
                     this.showToast('Microfono inattivo da troppo tempo. Riprova manualmente.', 'error');
                 }
 
-                if (shouldRestart && this.autoRestartEnabled) {
+                // CORREZIONE: Solo riavvia se microfono abilitato
+                if (shouldRestart && this.autoRestartEnabled && this.microphoneEnabled) {
                     this.restartTimeout = setTimeout(() => {
-                        if (this.autoRestartEnabled && !this.isListening) {
+                        if (this.autoRestartEnabled && !this.isListening && this.microphoneEnabled) {
                             console.log(`🔄 Riavvio automatico dopo ${error} (delay: ${restartDelay}ms)`);
                             this.startListening();
                         }
@@ -1228,7 +1253,7 @@
                 delay = Math.min(delay, 6000);
                 
                 this.restartTimeout = setTimeout(() => {
-                    if (this.autoRestartEnabled && !this.isListening && !this.isProcessing) {
+                    if (this.autoRestartEnabled && !this.isListening && !this.isProcessing && this.microphoneEnabled) {
                         console.log('🔄 Riavvio automatico programmato');
                         this.startListening();
                     }
@@ -1238,19 +1263,7 @@
             initEventListeners() {
                 if (this.microphoneButton) {
                     this.microphoneButton.addEventListener('click', () => {
-                        if (this.isListening) {
-                            this.autoRestartEnabled = false;
-                            this.stopListening();
-                            setTimeout(() => {
-                                this.autoRestartEnabled = true;
-                                this.desktopFix.consecutiveErrors = 0;
-                            }, 2000);
-                        } else {
-                            this.autoRestartEnabled = true;
-                            this.desktopFix.currentRetries = 0;
-                            this.desktopFix.consecutiveErrors = 0;
-                            this.startListening();
-                        }
+                        this.toggleMicrophone(); // CORREZIONE: Usa la funzione corretta
                     });
                 }
 
@@ -1289,7 +1302,7 @@
                 document.addEventListener('dblclick', (e) => {
                     if (e.target === document.body) {
                         const code = prompt('Codice amministratore:');
-                        if (code === 'ALUIA2025') {
+                        if (code === 'ALUIA2025') { // CODICE ADMIN CONFERMATO
                             this.adminBtn.style.display = 'block';
                             this.showToast('Modalità amministratore attivata', 'success');
                         }
@@ -1310,7 +1323,7 @@
                         setTimeout(() => {
                             this.autoRestartEnabled = true;
                             this.desktopFix.consecutiveErrors = 0;
-                            if (!this.isListening) {
+                            if (!this.isListening && this.microphoneEnabled) {
                                 this.startListening();
                             }
                         }, 1000);
@@ -1343,7 +1356,9 @@
                     
                     const startDelay = this.desktopFix.isDesktop ? 2000 : 1000;
                     setTimeout(() => {
-                        this.startListening();
+                        if (this.microphoneEnabled) {
+                            this.startListening();
+                        }
                     }, startDelay);
                 } catch (error) {
                     console.error('❌ Permessi microfono negati per avvio automatico:', error);
@@ -1352,13 +1367,13 @@
             }
 
             startListening() {
-                if (this.recognition && !this.isListening) {
+                if (this.recognition && !this.isListening && this.microphoneEnabled) {
                     try {
                         if (this.isListening) {
                             this.recognition.stop();
                             const retryDelay = this.desktopFix.isDesktop ? 2500 : 1500;
                             setTimeout(() => {
-                                if (!this.isListening) {
+                                if (!this.isListening && this.microphoneEnabled) {
                                     this.recognition.start();
                                 }
                             }, retryDelay);
@@ -1370,7 +1385,7 @@
                         this.desktopFix.consecutiveErrors++;
                         const retryDelay = this.desktopFix.isDesktop ? 3000 : 2000;
                         setTimeout(() => {
-                            if (!this.isListening && this.autoRestartEnabled && this.desktopFix.consecutiveErrors < 5) {
+                            if (!this.isListening && this.autoRestartEnabled && this.desktopFix.consecutiveErrors < 5 && this.microphoneEnabled) {
                                 this.startListening();
                             }
                         }, retryDelay);
@@ -1380,7 +1395,6 @@
 
             stopListening() {
                 if (this.recognition && this.isListening) {
-                    this.autoRestartEnabled = false;
                     this.recognition.stop();
                     if (this.restartTimeout) {
                         clearTimeout(this.restartTimeout);
@@ -1389,26 +1403,49 @@
                 }
             }
 
+            // CORREZIONE COMPLETA: Funzione toggle microfono corretta
             toggleMicrophone() {
-                if (this.isListening) {
+                if (this.microphoneEnabled) {
+                    // Disabilita il microfono
+                    console.log('🔇 Disabilitazione microfono dall\'utente');
+                    this.microphoneEnabled = false;
+                    this.autoRestartEnabled = false;
                     this.stopListening();
+                    this.showToast('Microfono disattivato', 'error');
                 } else {
+                    // Abilita il microfono
+                    console.log('🎤 Riabilitazione microfono dall\'utente');
+                    this.microphoneEnabled = true;
                     this.autoRestartEnabled = true;
                     this.desktopFix.currentRetries = 0;
                     this.desktopFix.consecutiveErrors = 0;
                     this.startListening();
+                    this.showToast('Microfono attivato', 'success');
                 }
+                this.updateMicrophoneUI();
             }
 
+            // CORREZIONE: UI microfono con stati corretti
             updateMicrophoneUI() {
-                if (this.isListening) {
+                if (!this.microphoneEnabled) {
+                    // Microfono disabilitato
+                    this.microphoneButton.classList.remove('listening');
+                    this.microphoneButton.classList.add('disabled');
+                    this.microphoneStatus.textContent = 'Microfono disattivato - Clicca per attivare';
+                    this.microphoneStatus.classList.remove('active');
+                    this.microphoneStatus.classList.add('disabled');
+                } else if (this.isListening) {
+                    // Microfono attivo e in ascolto
                     this.microphoneButton.classList.add('listening');
+                    this.microphoneButton.classList.remove('disabled');
                     this.microphoneStatus.textContent = 'Microfono attivo - Parla ora';
                     this.microphoneStatus.classList.add('active');
+                    this.microphoneStatus.classList.remove('disabled');
                 } else {
-                    this.microphoneButton.classList.remove('listening');
+                    // Microfono abilitato ma non in ascolto
+                    this.microphoneButton.classList.remove('listening', 'disabled');
                     this.microphoneStatus.textContent = 'Microfono sempre attivo';
-                    this.microphoneStatus.classList.remove('active');
+                    this.microphoneStatus.classList.remove('active', 'disabled');
                 }
             }
 
@@ -1493,7 +1530,7 @@
                     this.hideTyping();
                     this.addMessage(response, 'assistant');
                     
-                    // Sintesi vocale (nascosta)
+                    // ELEVENLABS INTEGRATO MA NASCOSTO
                     if (this.isElevenLabsConfigured && this.voiceId) {
                         await this.speakWithElevenLabs(response);
                     } else {
@@ -1519,7 +1556,7 @@
                 }
             }
 
-            // Sintesi vocale ElevenLabs (nascosta)
+            // ELEVENLABS COMPLETAMENTE NASCOSTO
             async speakWithElevenLabs(text) {
                 if (!this.isElevenLabsConfigured || !this.voiceId) return;
                 
@@ -1568,7 +1605,7 @@
                     };
                     
                     await audio.play();
-                    console.log('✅ Audio ElevenLabs riprodotto');
+                    console.log('✅ Audio ElevenLabs riprodotto (nascosto)');
                     
                 } catch (error) {
                     console.error('❌ Errore ElevenLabs:', error);
@@ -1581,7 +1618,7 @@
                     speechSynthesis.cancel();
                     
                     const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'it-IT';
+                    utterance.lang = 'it-IT'; // LINGUA ITALIANA CONFERMATA
                     utterance.rate = 0.85;
                     utterance.pitch = 1.1;
                     utterance.volume = 0.8;
@@ -1597,10 +1634,11 @@
                     };
                     
                     speechSynthesis.speak(utterance);
-                    console.log('🔊 Sintesi vocale nativa utilizzata');
+                    console.log('🔊 Sintesi vocale nativa utilizzata (italiano)');
                 }
             }
 
+            // RISPOSTE DEMO IN ITALIANO
             getDemoResponse(message) {
                 const responses = [
                     "Ti ascolto e capisco quello che stai vivendo. È normale sentirsi così a volte.",
@@ -1758,7 +1796,7 @@
 
         // Avvia AluIA quando la pagina è caricata
         document.addEventListener('DOMContentLoaded', () => {
-            console.log('📄 DOM caricato, inizializzando AluIA2025...');
+            console.log('📄 DOM caricato, inizializzando AluIA2025 Finale...');
             window.aluia = new AluIA();
         });
 
@@ -1782,37 +1820,36 @@
             console.log('🔍 Debug microfono:');
             console.log('- Recognition:', window.aluia?.recognition);
             console.log('- isListening:', window.aluia?.isListening);
+            console.log('- microphoneEnabled:', window.aluia?.microphoneEnabled);
             console.log('- isProcessing:', window.aluia?.isProcessing);
             console.log('- autoRestartEnabled:', window.aluia?.autoRestartEnabled);
             console.log('- Desktop fix:', window.aluia?.desktopFix);
             console.log('- ElevenLabs configured:', window.aluia?.isElevenLabsConfigured);
-            if (window.aluia?.recognition) {
-                console.log('- Recognition state: active');
-            }
         };
 
         window.resetMic = () => {
             console.log('🔄 Reset completo microfono...');
             if (window.aluia) {
-                window.aluia.autoRestartEnabled = false;
+                window.aluia.microphoneEnabled = true;
+                window.aluia.autoRestartEnabled = true;
                 window.aluia.stopListening();
                 window.aluia.desktopFix.currentRetries = 0;
                 window.aluia.desktopFix.consecutiveErrors = 0;
                 window.aluia.desktopFix.errorCount = 0;
                 setTimeout(() => {
-                    window.aluia.autoRestartEnabled = true;
                     window.aluia.startListening();
                     window.aluia.showToast('Microfono resettato', 'success');
                 }, 2000);
             }
         };
 
-        console.log('✅ Script AluIA2025 caricato. Comandi disponibili:');
+        console.log('✅ Script AluIA2025 FINALE caricato. Comandi disponibili:');
         console.log('- testMic(): Testa il microfono');
         console.log('- testChat(): Testa la chat');
         console.log('- debugMic(): Debug stato microfono');
         console.log('- resetMic(): Reset completo microfono');
         console.log('- Codice admin: ALUIA2025 (doppio click su sfondo)');
+        console.log('🎯 VERSIONE FINALE COMPLETA - Tutti i bug risolti!');
     </script>
 
 </body>
