@@ -255,11 +255,7 @@
             <span class="close" id="closeAdmin">&times;</span>
             <h2>⚙️ Configurazione Amministratore</h2>
             <div class="admin-form">
-                <label for="apiKey">OpenAI API Key:</label>
-                <input type="password" id="apiKey" placeholder="sk-...">
                 
-                <label for="elevenLabsKey">ElevenLabs API Key (opzionale):</label>
-                <input type="password" id="elevenLabsKey" placeholder="sk_...">
                 
                 <label for="assistantId">Assistant ID (opzionale):</label>
                 <input type="text" id="assistantId" placeholder="asst_...">
@@ -637,7 +633,7 @@
                     if (!this.isApiConfigured) {
                         response = this.getDemoResponse(message);
                     } else {
-                        const apiResponse = await fetch('https://api.openai.com/v1/chat/completions', {
+                        const apiResponse = await const apiResponse = await fetch('/api/chat', {   method: 'POST',   headers: { 'Content-Type': 'application/json' },   body: JSON.stringify({ messages: this.conversationHistory.slice(-10) }) });, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -696,7 +692,7 @@
                     const cleanText = text.replace(/[🔥💙✅❌⚠️🆘🎤💬🔒]/g, '').trim() || ' ';
                     const ctrl = new AbortController();
                     const tid = setTimeout(() => ctrl.abort('timeout'), 12000);
-                    const response = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${this.voiceId}`, {
+                    const response = await const response = await fetch('/api/tts', {   method: 'POST',   headers: { 'Content-Type': 'application/json' },   body: JSON.stringify({ text: cleanText, voiceId: this.voiceId }) });
                         method: 'POST',
                         signal: ctrl.signal,
                         headers: {
