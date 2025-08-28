@@ -1,803 +1,762 @@
 <!DOCTYPE html>
 <html lang="it">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AluIA - Supporto Psicologico</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #E8F4FD 0%, #F0F8FF 50%, #E8F4FD 100%);
-            min-height: 100vh; padding: 20px; transition: all 0.3s ease;
-        }
-        body.dark-mode { background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%); }
-        .container { max-width: 1200px; margin: 0 auto; display: grid; grid-template-columns: 1fr 1fr; gap: 30px; align-items: start; }
-        @media (max-width: 768px) { .container { grid-template-columns: 1fr; gap: 20px; } }
-        .card { background: rgba(255, 255, 255, 0.98); border-radius: 20px; padding: 30px; box-shadow: 0 8px 32px rgba(0, 0, 0, 0.06); backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.8); transition: all 0.3s ease; }
-        body.dark-mode .card { background: rgba(52, 73, 94, 0.95); color: #ecf0f1; border: 1px solid rgba(255, 255, 255, 0.1); }
-        .header { text-align: center; margin-bottom: 30px; grid-column: 1 / -1; }
-        .header h1 { font-size: 3rem; color: #4A90E2; margin-bottom: 10px; font-weight: 600; }
-        body.dark-mode .header h1 { color: #74b9ff; }
-        .header p { font-size: 1.2rem; color: #7B8FA3; font-weight: 400; }
-        body.dark-mode .header p { color: #bdc3c7; }
-        .status-bar { position: fixed; top: 20px; right: 20px; background: #FF9500; color: #fff; padding: 10px 20px; border-radius: 25px; font-weight: bold; z-index: 1000; backdrop-filter: blur(10px); border: none; box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3); }
-        .status-bar.connected { background: #4CAF50; }
-        .status-bar.elevenlabs { background: #9C27B0; }
-        .theme-toggle { position: fixed; top: 20px; left: 20px; background: rgba(255, 255, 255, 0.95); border: none; border-radius: 50%; width: 50px; height: 50px; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease; z-index: 1000; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); }
-        body.dark-mode .theme-toggle { background: rgba(52, 73, 94, 0.9); }
-        .theme-toggle:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15); }
-        .section-title { font-size: 1.5rem; color: #4A90E2; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; font-weight: 600; }
-        body.dark-mode .section-title { color: #74b9ff; }
-        .microphone-section { text-align: center; }
-        .microphone-button { width: 120px; height: 120px; border-radius: 50%; background: #4A90E2; border: none; color: #fff; font-size: 2.5rem; cursor: pointer; margin: 20px auto; display: block; transition: all 0.3s ease; box-shadow: 0 8px 24px rgba(74, 144, 226, 0.3); position: relative; overflow: hidden; }
-        .microphone-button:hover { transform: scale(1.05); box-shadow: 0 12px 32px rgba(74, 144, 226, 0.4); }
-        .microphone-button.listening { background: #e74c3c; animation: pulse 2s infinite; box-shadow: 0 8px 24px rgba(231, 76, 60, 0.4); }
-        .microphone-button.disabled { background: #95a5a6; box-shadow: 0 4px 12px rgba(149, 165, 166, 0.3); animation: none; }
-        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
-        .microphone-status { background: rgba(74, 144, 226, 0.1); border: 2px solid #4A90E2; border-radius: 25px; padding: 15px; margin: 20px 0; font-weight: 600; color: #4A90E2; transition: all 0.3s ease; }
-        body.dark-mode .microphone-status { background: rgba(74, 144, 226, 0.2); color: #74b9ff; }
-        .microphone-status.active { background: rgba(76, 175, 80, 0.1); border-color: #4CAF50; color: #4CAF50; }
-        .microphone-status.disabled { background: rgba(149, 165, 166, 0.1); border-color: #95a5a6; color: #95a5a6; }
-        body.dark-mode .microphone-status.active { color: #81C784; }
-        .transcript-area { background: rgba(248, 249, 250, 0.8); border: 2px dashed #D1D9E0; border-radius: 15px; padding: 20px; min-height: 100px; margin: 20px 0; font-style: italic; color: #7B8FA3; transition: all 0.3s ease; }
-        body.dark-mode .transcript-area { background: rgba(108, 117, 125, 0.2); color: #95a5a6; }
-        .transcript-area.has-content { background: rgba(74, 144, 226, 0.05); border-color: #4A90E2; color: #2c3e50; font-style: normal; }
-        body.dark-mode .transcript-area.has-content { color: #ecf0f1; }
-        .microphone-help { background: rgba(255, 193, 7, 0.08); border: 1px solid #FFE082; border-radius: 15px; padding: 15px; margin: 20px 0; font-size: 0.9rem; }
-        body.dark-mode .microphone-help { background: rgba(255, 193, 7, 0.15); }
-        .microphone-help h4 { color: #FF9500; margin-bottom: 10px; font-weight: 600; }
-        .microphone-help ol { margin-left: 20px; }
-        .microphone-help li { margin: 5px 0; color: #8D6E63; }
-        body.dark-mode .microphone-help li { color: #FFCC80; }
-        .chat-section { display: flex; flex-direction: column; height: 600px; }
-        .chat-container { flex: 1; background: rgba(248, 249, 250, 0.6); border-radius: 15px; padding: 20px; overflow-y: auto; margin-bottom: 20px; border: 1px solid rgba(0, 0, 0, 0.05); }
-        body.dark-mode .chat-container { background: rgba(44, 62, 80, 0.8); border-color: rgba(255, 255, 255, 0.1); }
-        .message { margin: 15px 0; padding: 15px 20px; border-radius: 20px; max-width: 80%; word-wrap: break-word; animation: fadeIn 0.3s ease; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-        .message.user { background: #4A90E2; color: #fff; margin-left: auto; border-bottom-right-radius: 5px; }
-        .message.assistant { background: rgba(248, 249, 250, 0.95); color: #2c3e50; margin-right: auto; border-bottom-left-radius: 5px; border: 1px solid rgba(74, 144, 226, 0.1); }
-        body.dark-mode .message.assistant { background: rgba(52, 73, 94, 0.9); color: #ecf0f1; border-color: rgba(255, 255, 255, 0.1); }
-        .typing-indicator { display: none; align-items: center; gap: 10px; padding: 15px 20px; background: rgba(248, 249, 250, 0.95); border-radius: 20px; border-bottom-left-radius: 5px; max-width: 80%; margin: 15px 0; border: 1px solid rgba(74, 144, 226, 0.1); }
-        body.dark-mode .typing-indicator { background: rgba(52, 73, 94, 0.9); border-color: rgba(255, 255, 255, 0.1); }
-        .typing-dots { display: flex; gap: 4px; }
-        .typing-dots span { width: 8px; height: 8px; background: #4A90E2; border-radius: 50%; animation: typing 1.4s infinite ease-in-out; }
-        .typing-dots span:nth-child(1) { animation-delay: -0.32s; }
-        .typing-dots span:nth-child(2) { animation-delay: -0.16s; }
-        @keyframes typing { 0%, 80%, 100% { transform: scale(0.8); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
-        .chat-input-container { display: flex; gap: 10px; align-items: center; }
-        .chat-input { flex: 1; padding: 15px 20px; border: 2px solid #FFE082; border-radius: 25px; font-size: 1rem; outline: none; transition: all 0.3s ease; background: rgba(255, 255, 255, 0.95); }
-        body.dark-mode .chat-input { background: rgba(52, 73, 94, 0.9); border-color: #7f8c8d; color: #ecf0f1; }
-        .chat-input:focus { border-color: #4A90E2; box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1); }
-        .send-button { background: #4A90E2; color: #fff; border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; transition: all 0.3s ease; display: flex; align-items: center; justify-content: center; font-weight: bold; box-shadow: 0 4px 12px rgba(74, 144, 226, 0.3); }
-        .send-button:hover { transform: scale(1.05); box-shadow: 0 6px 16px rgba(74, 144, 226, 0.4); }
-        .privacy-button { background: rgba(255, 149, 0, 0.1); border: 2px solid #FF9500; color: #FF9500; padding: 15px 30px; border-radius: 25px; cursor: pointer; font-weight: bold; margin: 20px auto; display: block; transition: all 0.3s ease; text-align: center; }
-        body.dark-mode .privacy-button { background: rgba(255, 149, 0, 0.2); color: #FFB74D; }
-        .privacy-button:hover { background: rgba(255, 149, 0, 0.2); transform: translateY(-2px); box-shadow: 0 6px 16px rgba(255, 149, 0, 0.3); }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 2000; backdrop-filter: blur(5px); }
-        .modal-content { background: white; margin: 5% auto; padding: 30px; border-radius: 20px; width: 90%; max-width: 600px; max-height: 80vh; overflow-y: auto; position: relative; animation: modalSlideIn 0.3s ease; box-shadow: 0 20px 60px rgba(0, 0, 0, 0.2); }
-        body.dark-mode .modal-content { background: #2c3e50; color: #ecf0f1; }
-        @keyframes modalSlideIn { from { transform: translateY(-50px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        .close { position: absolute; top: 15px; right: 20px; font-size: 2rem; cursor: pointer; color: #95a5a6; transition: color 0.3s ease; }
-        .close:hover { color: #e74c3c; }
-        .emergency-section { background: rgba(231, 76, 60, 0.08); border: 2px solid #FFCDD2; border-radius: 15px; padding: 20px; margin: 20px 0; }
-        .emergency-section h3 { color: #D32F2F; margin-bottom: 15px; }
-        .emergency-section p { color: #F44336; font-weight: 600; margin-bottom: 10px; }
-        .emergency-contacts { background: rgba(231, 76, 60, 0.03); border-left: 4px solid #F44336; padding: 15px; margin: 15px 0; }
-        .emergency-contacts h4 { color: #D32F2F; margin-bottom: 10px; font-size: 1.1rem; }
-        .emergency-contacts ul { list-style: none; padding: 0; }
-        .emergency-contacts li { margin: 8px 0; padding: 5px 0; color: #F44336; font-weight: 500; }
-        .emergency-contacts li strong { color: #D32F2F; }
-        .privacy-section { background: rgba(76, 175, 80, 0.08); border: 2px solid #C8E6C9; border-radius: 15px; padding: 20px; margin: 20px 0; }
-        .privacy-section h3 { color: #388E3C; margin-bottom: 15px; }
-        .quote { text-align: center; font-style: italic; color: #7B8FA3; margin: 30px 0; font-size: 1.1rem; }
-        body.dark-mode .quote { color: #95a5a6; }
-        .admin-button { display: none; position: fixed; bottom: 20px; right: 20px; background: rgba(52, 73, 94, 0.9); color: white; border: none; border-radius: 50%; width: 60px; height: 60px; font-size: 1.5rem; cursor: pointer; backdrop-filter: blur(10px); transition: all 0.3s ease; z-index: 1000; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); }
-        .admin-button:hover { transform: scale(1.1); box-shadow: 0 6px 16px rgba(0, 0, 0, 0.3); }
-        .admin-form { display: flex; flex-direction: column; gap: 20px; margin-top: 20px; }
-        .admin-form label { font-weight: 600; color: #2c3e50; }
-        body.dark-mode .admin-form label { color: #ecf0f1; }
-        .admin-form input, .admin-form select { padding: 12px 15px; border: 2px solid #E0E0E0; border-radius: 10px; font-size: 1rem; outline: none; transition: border-color 0.3s ease; }
-        body.dark-mode .admin-form input, body.dark-mode .admin-form select { background: #34495e; border-color: #7f8c8d; color: #ecf0f1; }
-        .admin-form input:focus, .admin-form select:focus { border-color: #4A90E2; }
-        .admin-form button { background: #4A90E2; color: white; border: none; padding: 15px 30px; border-radius: 10px; font-size: 1rem; font-weight: bold; cursor: pointer; transition: all 0.3s ease; }
-        .admin-form button:hover { transform: translateY(-2px); box-shadow: 0 6px 16px rgba(74, 144, 226, 0.3); }
-        .toast { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%) translateY(20px); background: rgba(76, 175, 80, 0.95); color: white; padding: 20px 30px; border-radius: 15px; font-weight: bold; z-index: 3000; opacity: 0; transition: all 0.3s ease; backdrop-filter: blur(10px); border: 1px solid rgba(255, 255, 255, 0.2); text-align: center; max-width: 80%; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); }
-        .toast.error { background: rgba(244, 67, 54, 0.95); }
-        .toast.show { opacity: 1; transform: translate(-50%, -50%) translateY(0); }
-        .emergency-footer { grid-column: 1 / -1; background: rgba(231, 76, 60, 0.08); border: 2px solid #FFCDD2; border-radius: 20px; padding: 30px; margin-top: 30px; }
-        .emergency-footer h2 { color: #D32F2F; text-align: center; margin-bottom: 25px; font-size: 1.8rem; }
-        .country-section { margin: 20px 0; padding: 15px; background: rgba(255,255,255,0.7); border-radius: 15px; border-left: 5px solid #F44336; }
-        body.dark-mode .country-section { background: rgba(52,73,94,0.5); }
-        .country-section h3 { color: #D32F2F; margin-bottom: 15px; display: flex; align-items: center; gap: 10px; }
-        .contact-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 10px; }
-        .contact-item { background: rgba(231,76,60,0.05); padding: 10px 15px; border-radius: 10px; border: 1px solid rgba(231,76,60,0.2); transition: all 0.3s ease; }
-        .contact-item:hover { background: rgba(231,76,60,0.1); transform: translateY(-2px); }
-        .contact-item strong { color: #D32F2F; }
-        .chat-container::-webkit-scrollbar { width: 8px; }
-        .chat-container::-webkit-scrollbar-track { background: rgba(0,0,0,0.05); border-radius: 10px; }
-        .chat-container::-webkit-scrollbar-thumb { background: rgba(74,144,226,0.6); border-radius: 10px; }
-        .chat-container::-webkit-scrollbar-thumb:hover { background: rgba(74,144,226,0.8); }
-        @media (max-width: 480px) {
-            body{ padding:10px } .card{ padding:20px } .header h1{ font-size:2rem }
-            .microphone-button{ width:100px; height:100px; font-size:2rem }
-            .chat-section{ height:500px } .message{ max-width:90% }
-            .contact-grid{ grid-template-columns:1fr }
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>AluIA - Supporto Psicologico</title>
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:'Segoe UI',Tahoma,Geneva,Verdana,sans-serif;background:linear-gradient(135deg,#E8F4FD 0%,#F0F8FF 50%,#E8F4FD 100%);min-height:100vh;padding:20px;transition:all .3s ease}
+    body.dark-mode{background:linear-gradient(135deg,#2c3e50 0%,#34495e 100%)}
+    .container{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:1fr 1fr;gap:30px;align-items:start}
+    @media (max-width:768px){.container{grid-template-columns:1fr;gap:20px}}
+    .card{background:rgba(255,255,255,.98);border-radius:20px;padding:30px;box-shadow:0 8px 32px rgba(0,0,0,.06);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.8);transition:all .3s ease}
+    body.dark-mode .card{background:rgba(52,73,94,.95);color:#ecf0f1;border:1px solid rgba(255,255,255,.1)}
+    .header{text-align:center;margin-bottom:30px;grid-column:1 / -1}
+    .header h1{font-size:3rem;color:#4A90E2;margin-bottom:10px;font-weight:600}
+    body.dark-mode .header h1{color:#74b9ff}
+    .header p{font-size:1.2rem;color:#7B8FA3;font-weight:400}
+    body.dark-mode .header p{color:#bdc3c7}
+    .status-bar{position:fixed;top:20px;right:20px;background:#FF9500;color:#fff;padding:10px 20px;border-radius:25px;font-weight:bold;z-index:1000;backdrop-filter:blur(10px);border:none;box-shadow:0 4px 12px rgba(255,149,0,.3)}
+    .status-bar.connected{background:#4CAF50}
+    .status-bar.elevenlabs{background:#9C27B0}
+    .status-bar.error{background:#d32f2f}
+    .theme-toggle{position:fixed;top:20px;left:20px;background:rgba(255,255,255,.95);border:none;border-radius:50%;width:50px;height:50px;font-size:1.5rem;cursor:pointer;backdrop-filter:blur(10px);transition:all .3s ease;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,.1)}
+    body.dark-mode .theme-toggle{background:rgba(52,73,94,.9)}
+    .theme-toggle:hover{transform:scale(1.1);box-shadow:0 6px 16px rgba(0,0,0,.15)}
+    .section-title{font-size:1.5rem;color:#4A90E2;margin-bottom:20px;display:flex;align-items:center;gap:10px;font-weight:600}
+    body.dark-mode .section-title{color:#74b9ff}
+    .microphone-section{text-align:center}
+    .microphone-button{width:120px;height:120px;border-radius:50%;background:#4A90E2;border:none;color:#fff;font-size:2.5rem;cursor:pointer;margin:20px auto;display:block;transition:all .3s ease;box-shadow:0 8px 24px rgba(74,144,226,.3);position:relative;overflow:hidden}
+    .microphone-button:hover{transform:scale(1.05);box-shadow:0 12px 32px rgba(74,144,226,.4)}
+    .microphone-button.listening{background:#e74c3c;animation:pulse 2s infinite;box-shadow:0 8px 24px rgba(231,76,60,.4)}
+    .microphone-button.disabled{background:#95a5a6;box-shadow:0 4px 12px rgba(149,165,166,.3);animation:none}
+    @keyframes pulse{0%{transform:scale(1)}50%{transform:scale(1.05)}100%{transform:scale(1)}}
+    .microphone-status{background:rgba(74,144,226,.1);border:2px solid #4A90E2;border-radius:25px;padding:15px;margin:20px 0;font-weight:600;color:#4A90E2;transition:all .3s ease}
+    body.dark-mode .microphone-status{background:rgba(74,144,226,.2);color:#74b9ff}
+    .microphone-status.active{background:rgba(76,175,80,.1);border-color:#4CAF50;color:#4CAF50}
+    .microphone-status.disabled{background:rgba(149,165,166,.1);border-color:#95a5a6;color:#95a5a6}
+    body.dark-mode .microphone-status.active{color:#81C784}
+    .transcript-area{background:rgba(248,249,250,.8);border:2px dashed #D1D9E0;border-radius:15px;padding:20px;min-height:100px;margin:20px 0;font-style:italic;color:#7B8FA3;transition:all .3s ease}
+    body.dark-mode .transcript-area{background:rgba(108,117,125,.2);color:#95a5a6}
+    .transcript-area.has-content{background:rgba(74,144,226,.05);border-color:#4A90E2;color:#2c3e50;font-style:normal}
+    body.dark-mode .transcript-area.has-content{color:#ecf0f1}
+    .microphone-help{background:rgba(255,193,7,.08);border:1px solid #FFE082;border-radius:15px;padding:15px;margin:20px 0;font-size:.9rem}
+    body.dark-mode .microphone-help{background:rgba(255,193,7,.15)}
+    .microphone-help h4{color:#FF9500;margin-bottom:10px;font-weight:600}
+    .microphone-help li{margin:5px 0;color:#8D6E63}
+    body.dark-mode .microphone-help li{color:#FFCC80}
+    .chat-section{display:flex;flex-direction:column;height:600px}
+    .chat-container{flex:1;background:rgba(248,249,250,.6);border-radius:15px;padding:20px;overflow-y:auto;margin-bottom:20px;border:1px solid rgba(0,0,0,.05)}
+    body.dark-mode .chat-container{background:rgba(44,62,80,.8);border-color:rgba(255,255,255,.1)}
+    .message{margin:15px 0;padding:15px 20px;border-radius:20px;max-width:80%;word-wrap:break-word;animation:fadeIn .3s ease}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+    .message.user{background:#4A90E2;color:#fff;margin-left:auto;border-bottom-right-radius:5px}
+    .message.assistant{background:rgba(248,249,250,.95);color:#2c3e50;margin-right:auto;border-bottom-left-radius:5px;border:1px solid rgba(74,144,226,.1)}
+    body.dark-mode .message.assistant{background:rgba(52,73,94,.9);color:#ecf0f1;border-color:rgba(255,255,255,.1)}
+    .typing-indicator{display:none;align-items:center;gap:10px;padding:15px 20px;background:rgba(248,249,250,.95);border-radius:20px;border-bottom-left-radius:5px;max-width:80%;margin:15px 0;border:1px solid rgba(74,144,226,.1)}
+    body.dark-mode .typing-indicator{background:rgba(52,73,94,.9);border-color:rgba(255,255,255,.1)}
+    .typing-dots{display:flex;gap:4px}
+    .typing-dots span{width:8px;height:8px;background:#4A90E2;border-radius:50%;animation:typing 1.4s infinite ease-in-out}
+    .typing-dots span:nth-child(1){animation-delay:-.32s}
+    .typing-dots span:nth-child(2){animation-delay:-.16s}
+    @keyframes typing{0%,80%,100%{transform:scale(.8);opacity:.5}40%{transform:scale(1);opacity:1}}
+    .chat-input-container{display:flex;gap:10px;align-items:center}
+    .chat-input{flex:1;padding:15px 20px;border:2px solid #FFE082;border-radius:25px;font-size:1rem;outline:none;transition:all .3s ease;background:rgba(255,255,255,.95)}
+    body.dark-mode .chat-input{background:rgba(52,73,94,.9);border-color:#7f8c8d;color:#ecf0f1}
+    .chat-input:focus{border-color:#4A90E2;box-shadow:0 0 0 3px rgba(74,144,226,.1)}
+    .send-button{background:#4A90E2;color:#fff;border:none;border-radius:50%;width:50px;height:50px;cursor:pointer;transition:all .3s ease;display:flex;align-items:center;justify-content:center;font-weight:bold;box-shadow:0 4px 12px rgba(74,144,226,.3)}
+    .send-button:hover{transform:scale(1.05);box-shadow:0 6px 16px rgba(74,144,226,.4)}
+    .privacy-button{background:rgba(255,149,0,.1);border:2px solid #FF9500;color:#FF9500;padding:15px 30px;border-radius:25px;cursor:pointer;font-weight:bold;margin:20px auto;display:block;transition:all .3s ease;text-align:center}
+    body.dark-mode .privacy-button{background:rgba(255,149,0,.2);color:#FFB74D}
+    .privacy-button:hover{background:rgba(255,149,0,.2);transform:translateY(-2px);box-shadow:0 6px 16px rgba(255,149,0,.3)}
+    .modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,.6);z-index:2000;backdrop-filter:blur(5px)}
+    .modal-content{background:#fff;margin:5% auto;padding:30px;border-radius:20px;width:90%;max-width:600px;max-height:80vh;overflow-y:auto;position:relative;animation:modalSlideIn .3s ease;box-shadow:0 20px 60px rgba(0,0,0,.2)}
+    body.dark-mode .modal-content{background:#2c3e50;color:#ecf0f1}
+    @keyframes modalSlideIn{from{transform:translateY(-50px);opacity:0}to{transform:translateY(0);opacity:1}}
+    .close{position:absolute;top:15px;right:20px;font-size:2rem;cursor:pointer;color:#95a5a6;transition:color .3s ease}
+    .close:hover{color:#e74c3c}
+    .emergency-section{background:rgba(231,76,60,.08);border:2px solid #FFCDD2;border-radius:15px;padding:20px;margin:20px 0}
+    .emergency-section h3{color:#D32F2F;margin-bottom:15px}
+    .emergency-section p{color:#F44336;font-weight:600;margin-bottom:10px}
+    .privacy-section{background:rgba(76,175,80,.08);border:2px solid #C8E6C9;border-radius:15px;padding:20px;margin:20px 0}
+    .privacy-section h3{color:#388E3C;margin-bottom:15px}
+    .quote{text-align:center;font-style:italic;color:#7B8FA3;margin:30px 0;font-size:1.1rem}
+    body.dark-mode .quote{color:#95a5a6}
+    .admin-button{display:none;position:fixed;bottom:20px;right:20px;background:rgba(52,73,94,.9);color:#fff;border:none;border-radius:50%;width:60px;height:60px;font-size:1.5rem;cursor:pointer;backdrop-filter:blur(10px);transition:all .3s ease;z-index:1000;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+    .admin-button:hover{transform:scale(1.1);box-shadow:0 6px 16px rgba(0,0,0,.3)}
+    .admin-form{display:flex;flex-direction:column;gap:20px;margin-top:20px}
+    .admin-form label{font-weight:600;color:#2c3e50}
+    body.dark-mode .admin-form label{color:#ecf0f1}
+    .admin-form input,.admin-form select{padding:12px 15px;border:2px solid #E0E0E0;border-radius:10px;font-size:1rem;outline:none;transition:border-color .3s ease}
+    body.dark-mode .admin-form input,body.dark-mode .admin-form select{background:#34495e;border-color:#7f8c8d;color:#ecf0f1}
+    .admin-form input:focus,.admin-form select:focus{border-color:#4A90E2}
+    .admin-form button{background:#4A90E2;color:#fff;border:none;padding:15px 30px;border-radius:10px;font-size:1rem;font-weight:bold;cursor:pointer;transition:all .3s ease}
+    .admin-form button:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(74,144,226,.3)}
+    .toast{position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) translateY(20px);background:rgba(76,175,80,.95);color:#fff;padding:20px 30px;border-radius:15px;font-weight:bold;z-index:3000;opacity:0;transition:all .3s ease;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2);text-align:center;max-width:80%;box-shadow:0 8px 24px rgba(0,0,0,.2)}
+    .toast.error{background:rgba(244,67,54,.95)}
+    .toast.show{opacity:1;transform:translate(-50%,-50%) translateY(0)}
+    .emergency-footer{grid-column:1 / -1;background:rgba(231,76,60,.08);border:2px solid #FFCDD2;border-radius:20px;padding:30px;margin-top:30px}
+    .emergency-footer h2{color:#D32F2F;text-align:center;margin-bottom:25px;font-size:1.8rem}
+    .country-section{margin:20px 0;padding:15px;background:rgba(255,255,255,.7);border-radius:15px;border-left:5px solid #F44336}
+    body.dark-mode .country-section{background:rgba(52,73,94,.5)}
+    .country-section h3{color:#D32F2F;margin-bottom:15px;display:flex;align-items:center;gap:10px}
+    .contact-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:10px}
+    .contact-item{background:rgba(231,76,60,.05);padding:10px 15px;border-radius:10px;border:1px solid rgba(231,76,60,.2);transition:all .3s ease}
+    .contact-item:hover{background:rgba(231,76,60,.1);transform:translateY(-2px)}
+    .contact-item strong{color:#D32F2F}
+    .chat-container::-webkit-scrollbar{width:8px}
+    .chat-container::-webkit-scrollbar-track{background:rgba(0,0,0,.05);border-radius:10px}
+    .chat-container::-webkit-scrollbar-thumb{background:rgba(74,144,226,.6);border-radius:10px}
+    .chat-container::-webkit-scrollbar-thumb:hover{background:rgba(74,144,226,.8)}
+    @media (max-width:480px){
+      body{padding:10px}.card{padding:20px}.header h1{font-size:2rem}
+      .microphone-button{width:100px;height:100px;font-size:2rem}
+      .chat-section{height:500px}.message{max-width:90%}
+      .contact-grid{grid-template-columns:1fr}
+    }
+  </style>
 </head>
 <body>
-    <button class="theme-toggle" id="themeToggle">🌙</button>
-    <div class="status-bar" id="statusBar">⚠️ Modalità Demo</div>
-    <button class="admin-button" id="adminBtn">⚙️</button>
+  <button class="theme-toggle" id="themeToggle">🌙</button>
+  <div class="status-bar" id="statusBar">⚠️ Modalità Demo</div>
+  <button class="admin-button" id="adminBtn">⚙️</button>
 
-    <div class="container">
-        <div class="header card">
-            <h1>AluIA</h1>
-            <p>Supporto psicologico intelligente sempre al tuo fianco</p>
-        </div>
-
-        <div class="card">
-            <h2 class="section-title">🎤 Comunicazione Vocale</h2>
-            <div class="microphone-section">
-                <button class="microphone-button" id="microphoneButton">🎤</button>
-                <div class="microphone-status" id="microphoneStatus">Microfono sempre attivo</div>
-                <div class="transcript-area" id="transcriptArea">La trascrizione in tempo reale apparirà qui...</div>
-                
-                <div class="microphone-help">
-                    <h4>🔓 Come sbloccare il microfono:</h4>
-                    <ol>
-                        <li>Usa la pagina in <strong>HTTPS</strong> (o <code>localhost/127.0.0.1</code> in sviluppo)</li>
-                        <li>Clicca sull'icona del lucchetto 🔒 e consenti il microfono</li>
-                        <li>Ricarica la pagina (F5) se richiesto</li>
-                    </ol>
-                </div>
-            </div>
-        </div>
-
-        <div class="card">
-            <h2 class="section-title">💬 Chat con Alu</h2>
-            <div class="chat-section">
-                <div class="chat-container" id="chatContainer">
-                    <div class="message assistant">
-                        👋 Ciao! Sono Alu e sono qui per aiutarti. Puoi parlarmi vocalmente premendo il microfono o scrivere qui nella chat. Come posso supportarti oggi?
-                    </div>
-                    <div class="typing-indicator" id="typingIndicator">
-                        <span>Alu sta scrivendo</span>
-                        <div class="typing-dots">
-                            <span></span><span></span><span></span>
-                        </div>
-                    </div>
-                </div>
-                <div class="chat-input-container">
-                    <input type="text" class="chat-input" id="chatInput" placeholder="Scrivi il tuo messaggio...">
-                    <button class="send-button" id="sendButton">Invia</button>
-                </div>
-            </div>
-        </div>
-
-        <button class="privacy-button" id="privacyButton">🔒 Privacy & Sicurezza</button>
-
-        <!-- Footer Contatti di Emergenza -->
-        <div class="emergency-footer">
-            <h2>🆘 CONTATTI DI EMERGENZA</h2>
-            <div class="country-section">
-                <h3>🇮🇹 ITALIA</h3>
-                <div class="contact-grid">
-                    <div class="contact-item">📞 <strong>Telefono Amico:</strong> 800.833.833</div>
-                    <div class="contact-item">🌍 <strong>Dall'estero:</strong> +39 02 20228733</div>
-                    <div class="contact-item">🚨 <strong>Numero Unico Emergenza:</strong> 112</div>
-                    <div class="contact-item">🛡️ <strong>Antiviolenza e Stalking:</strong> 1522</div>
-                    <div class="contact-item">❤️ <strong>Croce Rossa Emergenza Psicologica:</strong> 1520</div>
-                </div>
-            </div>
-            <div class="country-section">
-                <h3>🇵🇹 PORTOGALLO</h3>
-                <div class="contact-grid">
-                    <div class="contact-item">🏥 <strong>SNS 24:</strong> 808 24 24 24 (opzione 4)</div>
-                    <div class="contact-item">🆘 <strong>APAV:</strong> 116 006</div>
-                    <div class="contact-item">🚨 <strong>Emergenza UE:</strong> 112</div>
-                    <div class="contact-item">💚 <strong>SOS Voz Amiga:</strong> 213 544 545</div>
-                    <div class="contact-item">🤝 <strong>Conversa Amiga:</strong> 925 512 884</div>
-                    <div class="contact-item">📞 <strong>Telefone da Amizade:</strong> 228 323 535</div>
-                </div>
-            </div>
-            <div class="country-section">
-                <h3>🇬🇧 REGNO UNITO</h3>
-                <div class="contact-grid">
-                    <div class="contact-item">🚨 <strong>Emergenze:</strong> 999</div>
-                    <div class="contact-item">🛡️ <strong>Domestic Abuse Helpline:</strong> 0808 2000 247</div>
-                    <div class="contact-item">💙 <strong>Samaritans:</strong> 116 123</div>
-                    <div class="contact-item">👶 <strong>Childline:</strong> 0800 1111</div>
-                </div>
-            </div>
-            <div class="country-section">
-                <h3>🇪🇸 SPAGNA</h3>
-                <div class="contact-grid">
-                    <div class="contact-item">🚨 <strong>Emergenza Generale:</strong> 112</div>
-                    <div class="contact-item">🧠 <strong>Supporto Psicologico 24h:</strong> 800 101 800</div>
-                    <div class="contact-item">🛡️ <strong>Violenza di Genere:</strong> 016</div>
-                    <div class="contact-item">💚 <strong>Telefono della Speranza:</strong> 717 003 717</div>
-                </div>
-            </div>
-        </div>
+  <div class="container">
+    <div class="header card">
+      <h1>AluIA</h1>
+      <p>Supporto psicologico intelligente sempre al tuo fianco</p>
     </div>
 
-    <!-- Privacy Modal -->
-    <div class="modal" id="privacyModal">
-        <div class="modal-content">
-            <span class="close" id="closePrivacy">&times;</span>
-            <h2>🔒 Privacy & Sicurezza</h2>
-            <div class="emergency-section">
-                <h3>🆘 CONTATTI DI EMERGENZA</h3>
-                <p>⚠️ IMPORTANTE: AluIA non sostituisce il supporto psicologico professionale.</p>
-                <p>In caso di emergenze, contatta immediatamente un professionista qualificato o i servizi di emergenza.</p>
-            </div>
-            <div class="privacy-section">
-                <h3>🔒 Privacy Garantita</h3>
-                <p><strong>Tutte le conversazioni sono completamente private e sicure.</strong> I tuoi dati non vengono mai condivisi o salvati sui nostri server.</p>
-                <ul>
-                    <li>✅ Nessun salvataggio permanente delle conversazioni</li>
-                    <li>✅ Comunicazione crittografata</li>
-                    <li>✅ Nessuna condivisione con terze parti</li>
-                    <li>✅ Anonimato garantito</li>
-                    <li>✅ Dati processati localmente nel browser</li>
-                    <li>✅ Nessun tracking o profilazione</li>
-                </ul>
-            </div>
-            <div class="quote">💙 "Quando vuoi, sono qui per ascoltarti sempre." - Alu</div>
+    <div class="card">
+      <h2 class="section-title">🎤 Comunicazione Vocale</h2>
+      <div class="microphone-section">
+        <button class="microphone-button" id="microphoneButton">🎤</button>
+        <div class="microphone-status" id="microphoneStatus">Microfono sempre attivo</div>
+        <div class="transcript-area" id="transcriptArea">La trascrizione in tempo reale apparirà qui...</div>
+        <div class="microphone-help">
+          <h4>🔓 Come sbloccare il microfono:</h4>
+          <ol>
+            <li>Usa la pagina in <strong>HTTPS</strong> (o <code>localhost/127.0.0.1</code> in sviluppo)</li>
+            <li>Clicca sull'icona del lucchetto 🔒 e consenti il microfono</li>
+            <li>Ricarica la pagina (F5) se richiesto</li>
+          </ol>
         </div>
+      </div>
     </div>
 
-    <!-- Admin Config Modal -->
-    <div class="modal" id="adminModal">
-        <div class="modal-content">
-            <span class="close" id="closeAdmin">&times;</span>
-            <h2>⚙️ Configurazione Amministratore</h2>
-            <div class="admin-form">
-                <label for="assistantId">Assistant ID (opzionale):</label>
-                <input type="text" id="assistantId" placeholder="asst_...">
-
-                <label for="voiceId">Voice ID ElevenLabs:</label>
-                <select id="voiceId">
-                    <option value="">Usa sintesi nativa</option>
-                    <option value="IyWqvgbFwm4IK1x6M489" selected>Voce personalizzata (IyWqvgbFwm4IK1x6M489)</option>
-                    <option value="21m00Tcm4TlvDq8ikWAM">Rachel (EN - F)</option>
-                    <option value="AZnzlk1XvdvUeBnXmlld">Domi (EN - F)</option>
-                    <option value="EXAVITQu4vr4xnSDxMaL">Bella (EN - F)</option>
-                    <option value="ErXwobaYiN019PkySvjV">Antoni (EN - M)</option>
-                    <option value="MF3mGyEYCl7XYWbV9V6O">Elli (EN - F)</option>
-                    <option value="TxGEqnHWrfWFTfGW9XjX">Josh (EN - M)</option>
-                </select>
-                <button onclick="window.aluia.saveAdminConfig()">Salva Configurazione</button>
-            </div>
+    <div class="card">
+      <h2 class="section-title">💬 Chat con Alu</h2>
+      <div class="chat-section">
+        <div class="chat-container" id="chatContainer">
+          <div class="message assistant">👋 Ciao! Sono Alu e sono qui per aiutarti. Puoi parlarmi vocalmente premendo il microfono o scrivere qui nella chat. Come posso supportarti oggi?</div>
+          <div class="typing-indicator" id="typingIndicator">
+            <span>Alu sta scrivendo</span>
+            <div class="typing-dots"><span></span><span></span><span></span></div>
+          </div>
         </div>
+        <div class="chat-input-container">
+          <input type="text" class="chat-input" id="chatInput" placeholder="Scrivi il tuo messaggio...">
+          <button class="send-button" id="sendButton">Invia</button>
+        </div>
+      </div>
     </div>
 
-    <script>
-        console.log('🚀 Avvio AluIA – versione corretta (server /api/chat + /api/tts)');
+    <button class="privacy-button" id="privacyButton">🔒 Privacy & Sicurezza</button>
 
-        function isSecureLikeContext(){
-          const {protocol, hostname} = location;
-          return protocol === 'https:' || hostname === 'localhost' || hostname === '127.0.0.1';
+    <div class="emergency-footer">
+      <h2>🆘 CONTATTI DI EMERGENZA</h2>
+      <div class="country-section">
+        <h3>🇮🇹 ITALIA</h3>
+        <div class="contact-grid">
+          <div class="contact-item">📞 <strong>Telefono Amico:</strong> 800.833.833</div>
+          <div class="contact-item">🌍 <strong>Dall'estero:</strong> +39 02 20228733</div>
+          <div class="contact-item">🚨 <strong>Numero Unico Emergenza:</strong> 112</div>
+          <div class="contact-item">🛡️ <strong>Antiviolenza e Stalking:</strong> 1522</div>
+          <div class="contact-item">❤️ <strong>Croce Rossa Emergenza Psicologica:</strong> 1520</div>
+        </div>
+      </div>
+      <div class="country-section">
+        <h3>🇵🇹 PORTOGALLO</h3>
+        <div class="contact-grid">
+          <div class="contact-item">🏥 <strong>SNS 24:</strong> 808 24 24 24 (opzione 4)</div>
+          <div class="contact-item">🆘 <strong>APAV:</strong> 116 006</div>
+          <div class="contact-item">🚨 <strong>Emergenza UE:</strong> 112</div>
+          <div class="contact-item">💚 <strong>SOS Voz Amiga:</strong> 213 544 545</div>
+          <div class="contact-item">🤝 <strong>Conversa Amiga:</strong> 925 512 884</div>
+          <div class="contact-item">📞 <strong>Telefone da Amizade:</strong> 228 323 535</div>
+        </div>
+      </div>
+      <div class="country-section">
+        <h3>🇬🇧 REGNO UNITO</h3>
+        <div class="contact-grid">
+          <div class="contact-item">🚨 <strong>Emergenze:</strong> 999</div>
+          <div class="contact-item">🛡️ <strong>Domestic Abuse Helpline:</strong> 0808 2000 247</div>
+          <div class="contact-item">💙 <strong>Samaritans:</strong> 116 123</div>
+          <div class="contact-item">👶 <strong>Childline:</strong> 0800 1111</div>
+        </div>
+      </div>
+      <div class="country-section">
+        <h3>🇪🇸 SPAGNA</h3>
+        <div class="contact-grid">
+          <div class="contact-item">🚨 <strong>Emergenza Generale:</strong> 112</div>
+          <div class="contact-item">🧠 <strong>Supporto Psicologico 24h:</strong> 800 101 800</div>
+          <div class="contact-item">🛡️ <strong>Violenza di Genere:</strong> 016</div>
+          <div class="contact-item">💚 <strong>Telefono della Speranza:</strong> 717 003 717</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Privacy Modal -->
+  <div class="modal" id="privacyModal">
+    <div class="modal-content">
+      <span class="close" id="closePrivacy">&times;</span>
+      <h2>🔒 Privacy & Sicurezza</h2>
+      <div class="emergency-section">
+        <h3>🆘 CONTATTI DI EMERGENZA</h3>
+        <p>⚠️ IMPORTANTE: AluIA non sostituisce il supporto psicologico professionale.</p>
+        <p>In caso di emergenze, contatta immediatamente un professionista qualificato o i servizi di emergenza.</p>
+      </div>
+      <div class="privacy-section">
+        <h3>🔒 Privacy Garantita</h3>
+        <p><strong>Tutte le conversazioni sono completamente private e sicure.</strong> I tuoi dati non vengono mai condivisi o salvati sui nostri server.</p>
+        <ul>
+          <li>✅ Nessun salvataggio permanente delle conversazioni</li>
+          <li>✅ Comunicazione crittografata</li>
+          <li>✅ Nessuna condivisione con terze parti</li>
+          <li>✅ Anonimato garantito</li>
+          <li>✅ Dati processati localmente nel browser</li>
+          <li>✅ Nessun tracking o profilazione</li>
+        </ul>
+      </div>
+      <div class="quote">💙 "Quando vuoi, sono qui per ascoltarti sempre." - Alu</div>
+    </div>
+  </div>
+
+  <!-- Admin Config Modal -->
+  <div class="modal" id="adminModal">
+    <div class="modal-content">
+      <span class="close" id="closeAdmin">&times;</span>
+      <h2>⚙️ Configurazione Amministratore</h2>
+      <div class="admin-form">
+        <label for="assistantId">Assistant ID (opzionale):</label>
+        <input type="text" id="assistantId" placeholder="asst_...">
+        <label for="voiceId">Voice ID ElevenLabs:</label>
+        <select id="voiceId">
+          <option value="">Usa sintesi nativa</option>
+          <option value="IyWqvgbFwm4IK1x6M489" selected>Voce personalizzata (IyWqvgbFwm4IK1x6M489)</option>
+          <option value="21m00Tcm4TlvDq8ikWAM">Rachel (EN - F)</option>
+          <option value="AZnzlk1XvdvUeBnXmlld">Domi (EN - F)</option>
+          <option value="EXAVITQu4vr4xnSDxMaL">Bella (EN - F)</option>
+          <option value="ErXwobaYiN019PkySvjV">Antoni (EN - M)</option>
+          <option value="MF3mGyEYCl7XYWbV9V6O">Elli (EN - F)</option>
+          <option value="TxGEqnHWrfWFTfGW9XjX">Josh (EN - M)</option>
+        </select>
+        <button onclick="window.aluia.saveAdminConfig()">Salva Configurazione</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    console.log('🚀 Avvio AluIA – versione frontend collegata a /api/chat e /api/tts');
+
+    function isSecureLikeContext(){
+      const {protocol, hostname} = location;
+      return protocol === 'https:' || hostname === 'localhost' || hostname === '127.0.0.1';
+    }
+
+    class AluIA {
+      constructor(){
+        this.recognition = null;
+        this.isListening = false;
+        this.isProcessing = false;
+        this.autoRestartEnabled = true;
+        this.restartTimeout = null;
+        this.conversationHistory = [];
+        this.isDarkMode = localStorage.getItem('aluia_theme') === 'dark';
+        this.assistantId = localStorage.getItem('aluia_assistant_id') || '';
+        this.voiceId = localStorage.getItem('aluia_voice_id') || 'IyWqvgbFwm4IK1x6M489';
+        this.microphoneEnabled = true;
+
+        // anti-loop
+        this.isSpeaking = false;
+        this.ignoreAsrUntil = 0;
+        this.postTtsCooldownMs = 900;
+
+        this.desktopFix = {
+          maxRetries: 5,
+          currentRetries: 0,
+          isDesktop: !this.isMobileDevice(),
+          lastError: null,
+          errorCount: 0,
+          consecutiveErrors: 0,
+          lastSuccessTime: Date.now(),
+          adaptiveDelay: 1500
+        };
+
+        this.initElements();
+        this.initSpeechRecognition();
+        this.initEventListeners();
+        this.applyTheme();
+        this.initVoicesOnce();
+
+        this.setStatus('demo','⏳ Avvio…');
+        setTimeout(()=>{ this.startAutoListening(); },1000);
+      }
+
+      // ===== UI helpers
+      setStatus(kind,text){
+        this.statusBar.classList.remove('connected','elevenlabs','error');
+        if(kind) this.statusBar.classList.add(kind);
+        if(text) this.statusBar.textContent = text;
+      }
+
+      updateUI(){}
+
+      isMobileDevice(){
+        return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
+               (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
+      }
+
+      initElements(){
+        this.microphoneButton = document.getElementById('microphoneButton');
+        this.microphoneStatus = document.getElementById('microphoneStatus');
+        this.transcriptArea = document.getElementById('transcriptArea');
+        this.chatContainer = document.getElementById('chatContainer');
+        this.chatInput = document.getElementById('chatInput');
+        this.sendButton = document.getElementById('sendButton');
+        this.typingIndicator = document.getElementById('typingIndicator');
+        this.statusBar = document.getElementById('statusBar');
+        this.themeToggle = document.getElementById('themeToggle');
+        this.adminBtn = document.getElementById('adminBtn');
+        this.privacyModal = document.getElementById('privacyModal');
+        this.adminModal = document.getElementById('adminModal');
+      }
+
+      // ===== Speech Rec
+      initSpeechRecognition(){
+        if('webkitSpeechRecognition' in window || 'SpeechRecognition' in window){
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          this.recognition = new SpeechRecognition();
+          this.recognition.continuous = true;
+          this.recognition.interimResults = true;
+          this.recognition.lang = 'it-IT';
+          this.recognition.maxAlternatives = 1;
+
+          try{ this.recognition.grammars = new (window.SpeechGrammarList || window.webkitSpeechGrammarList)(); }catch(e){}
+
+          this.recognition.onstart = () => {
+            this.isListening = true;
+            this.desktopFix.currentRetries = 0;
+            this.desktopFix.consecutiveErrors = 0;
+            this.desktopFix.lastSuccessTime = Date.now();
+            this.updateMicrophoneUI();
+          };
+
+          this.recognition.onresult = (event) => {
+            if(this.isSpeaking || Date.now() < this.ignoreAsrUntil) return;
+            let finalTranscript='', interimTranscript='';
+            for(let i=event.resultIndex;i<event.results.length;i++){
+              const transcript = event.results[i][0].transcript;
+              if(event.results[i].isFinal) finalTranscript += transcript; else interimTranscript += transcript;
+            }
+            this.transcriptArea.textContent = finalTranscript + interimTranscript;
+            this.transcriptArea.classList.add('has-content');
+            if(finalTranscript.trim()){
+              this.desktopFix.lastSuccessTime = Date.now();
+              this.desktopFix.consecutiveErrors = 0;
+              this.processVoiceInput(finalTranscript.trim());
+            }
+          };
+
+          this.recognition.onerror = (event) => {
+            this.desktopFix.lastError = event.error;
+            this.desktopFix.errorCount++;
+            this.desktopFix.consecutiveErrors++;
+            this.handleSpeechErrorAdvanced(event.error);
+          };
+
+          this.recognition.onend = () => {
+            this.isListening = false;
+            this.updateMicrophoneUI();
+            if(this.autoRestartEnabled && !this.isProcessing && this.microphoneEnabled && !this.isSpeaking){
+              this.scheduleSmartRestart();
+            }
+          };
+        } else {
+          this.showToast('Riconoscimento vocale non supportato in questo browser','error');
         }
-
-        class AluIA {
-            constructor() {
-                this.recognition = null;
-                this.isListening = false;
-                this.isProcessing = false;
-                this.autoRestartEnabled = true;
-                this.restartTimeout = null;
-                this.conversationHistory = [];
-                this.isDarkMode = localStorage.getItem('aluia_theme') === 'dark';
-                this.assistantId = localStorage.getItem('aluia_assistant_id') || '';
-                this.voiceId = localStorage.getItem('aluia_voice_id') || 'IyWqvgbFwm4IK1x6M489';
-                this.microphoneEnabled = true;
-
-                // Anti-loop vocale
-                this.isSpeaking = false;
-                this.ignoreAsrUntil = 0;
-                this.postTtsCooldownMs = 900;
-
-                this.desktopFix = {
-                    maxRetries: 5,
-                    currentRetries: 0,
-                    isDesktop: !this.isMobileDevice(),
-                    lastError: null,
-                    errorCount: 0,
-                    consecutiveErrors: 0,
-                    lastSuccessTime: Date.now(),
-                    adaptiveDelay: 1500
-                };
-
-                this.initElements();
-                this.initSpeechRecognition();
-                this.initEventListeners();
-                this.applyTheme();
-
-                setTimeout(() => { this.startAutoListening(); }, 1000);
-                this.initVoicesOnce();
-
-                this.statusBar.textContent = '⏳ Avvio...';
-                this.updateUI();
-            }
-
-            updateUI(){ /* placeholder per future update; lasciare così */ }
-
-            isMobileDevice() {
-                return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) ||
-                       (navigator.maxTouchPoints && navigator.maxTouchPoints > 2);
-            }
-
-            initElements() {
-                this.microphoneButton = document.getElementById('microphoneButton');
-                this.microphoneStatus = document.getElementById('microphoneStatus');
-                this.transcriptArea = document.getElementById('transcriptArea');
-                this.chatContainer = document.getElementById('chatContainer');
-                this.chatInput = document.getElementById('chatInput');
-                this.sendButton = document.getElementById('sendButton');
-                this.typingIndicator = document.getElementById('typingIndicator');
-                this.statusBar = document.getElementById('statusBar');
-                this.themeToggle = document.getElementById('themeToggle');
-                this.adminBtn = document.getElementById('adminBtn');
-                this.privacyModal = document.getElementById('privacyModal');
-                this.adminModal = document.getElementById('adminModal');
-            }
-
-            initSpeechRecognition() {
-                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                    this.recognition = new SpeechRecognition();
-                    this.recognition.continuous = true;
-                    this.recognition.interimResults = true;
-                    this.recognition.lang = 'it-IT';
-                    this.recognition.maxAlternatives = 1;
-
-                    try { this.recognition.grammars = new (window.SpeechGrammarList || window.webkitSpeechGrammarList)(); } catch (e) {}
-
-                    this.recognition.onstart = () => {
-                        this.isListening = true;
-                        this.desktopFix.currentRetries = 0;
-                        this.desktopFix.consecutiveErrors = 0;
-                        this.desktopFix.lastSuccessTime = Date.now();
-                        this.updateMicrophoneUI();
-                    };
-
-                    this.recognition.onresult = (event) => {
-                        if (this.isSpeaking || Date.now() < this.ignoreAsrUntil) return;
-
-                        let finalTranscript = '', interimTranscript = '';
-                        for (let i = event.resultIndex; i < event.results.length; i++) {
-                            const transcript = event.results[i][0].transcript;
-                            if (event.results[i].isFinal) finalTranscript += transcript;
-                            else interimTranscript += transcript;
-                        }
-
-                        this.transcriptArea.textContent = finalTranscript + interimTranscript;
-                        this.transcriptArea.classList.add('has-content');
-
-                        if (finalTranscript.trim()) {
-                            this.desktopFix.lastSuccessTime = Date.now();
-                            this.desktopFix.consecutiveErrors = 0;
-                            this.processVoiceInput(finalTranscript.trim());
-                        }
-                    };
-
-                    this.recognition.onerror = (event) => {
-                        this.desktopFix.lastError = event.error;
-                        this.desktopFix.errorCount++;
-                        this.desktopFix.consecutiveErrors++;
-                        this.handleSpeechErrorAdvanced(event.error);
-                    };
-
-                    this.recognition.onend = () => {
-                        this.isListening = false;
-                        this.updateMicrophoneUI();
-                        if (this.autoRestartEnabled && !this.isProcessing && this.microphoneEnabled && !this.isSpeaking) {
-                            this.scheduleSmartRestart();
-                        }
-                    };
-                } else {
-                    this.showToast('Riconoscimento vocale non supportato in questo browser', 'error');
-                }
-            }
-
-            handleSpeechErrorAdvanced(error) {
-                if (this.restartTimeout) clearTimeout(this.restartTimeout);
-                let restartDelay = this.desktopFix.adaptiveDelay;
-                let shouldRestart = true;
-
-                if (this.desktopFix.consecutiveErrors > 2) {
-                    restartDelay = Math.min(8000, this.desktopFix.adaptiveDelay * Math.pow(1.5, this.desktopFix.consecutiveErrors - 2));
-                }
-
-                switch (error) {
-                    case 'not-allowed':
-                        this.autoRestartEnabled = false; shouldRestart = false;
-                        this.showToast('Permessi microfono negati. Clicca il microfono per riprovare.', 'error'); break;
-                    case 'audio-capture':
-                        if (this.desktopFix.consecutiveErrors > 2) { shouldRestart = false; this.showToast('Problema con il microfono. Controlla le impostazioni.', 'error'); }
-                        else restartDelay = 3000;
-                        break;
-                    default: break;
-                }
-
-                const timeSinceSuccess = Date.now() - this.desktopFix.lastSuccessTime;
-                if (timeSinceSuccess > 60000 && this.desktopFix.consecutiveErrors > 3) shouldRestart = false;
-
-                if (shouldRestart && this.autoRestartEnabled && this.microphoneEnabled && !this.isSpeaking) {
-                    this.restartTimeout = setTimeout(() => {
-                        if (this.autoRestartEnabled && !this.isListening && this.microphoneEnabled && !this.isSpeaking) {
-                            this.startListening();
-                        }
-                    }, restartDelay);
-                }
-
-                this.isListening = false;
-                this.updateMicrophoneUI();
-            }
-
-            scheduleSmartRestart() {
-                let delay = this.desktopFix.isDesktop ? 2500 : 1500;
-                if (this.desktopFix.consecutiveErrors > 0) delay += this.desktopFix.consecutiveErrors * 500;
-                delay = Math.min(delay, 6000);
-
-                this.restartTimeout = setTimeout(() => {
-                    if (this.autoRestartEnabled && !this.isListening && !this.isProcessing && this.microphoneEnabled && !this.isSpeaking) {
-                        this.startListening();
-                    }
-                }, delay);
-            }
-
-            initEventListeners() {
-                this.microphoneButton?.addEventListener('click', () => this.toggleMicrophone());
-                this.sendButton?.addEventListener('click', () => this.sendMessage());
-                this.chatInput?.addEventListener('keypress', (e) => { if (e.key === 'Enter') this.sendMessage(); });
-                this.themeToggle?.addEventListener('click', () => this.toggleTheme());
-
-                document.getElementById('privacyButton')?.addEventListener('click', () => this.showPrivacyModal());
-                document.getElementById('closePrivacy')?.addEventListener('click', () => this.hidePrivacyModal());
-                document.getElementById('closeAdmin')?.addEventListener('click', () => this.hideAdminModal());
-
-                document.addEventListener('click', (e) => {
-                    if (e.target === this.privacyModal) this.hidePrivacyModal();
-                    if (e.target === this.adminModal) this.hideAdminModal();
-                });
-
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') { this.hidePrivacyModal(); this.hideAdminModal(); }
-                });
-
-                document.addEventListener('dblclick', (e) => {
-                    if (e.target === document.body) {
-                        const code = prompt('Codice amministratore:');
-                        if (code === 'ALUIA2025') {
-                            this.adminBtn.style.display = 'block';
-                            this.showToast('Modalità amministratore attivata', 'success');
-                        }
-                    }
-                });
-
-                this.adminBtn?.addEventListener('click', () => this.showAdminModal());
-
-                document.addEventListener('visibilitychange', () => {
-                    if (document.hidden) {
-                        if (this.isListening) {
-                            this.autoRestartEnabled = false;
-                            this.stopListening();
-                        }
-                    } else {
-                        setTimeout(() => {
-                            this.autoRestartEnabled = true;
-                            this.desktopFix.consecutiveErrors = 0;
-                            if (!this.isListening && this.microphoneEnabled && !this.isSpeaking) {
-                                this.startListening();
-                            }
-                        }, 1000);
-                    }
-                });
-            }
-
-            async startAutoListening() {
-                try {
-                    if (!isSecureLikeContext()) {
-                        this.showToast('Apri la pagina in HTTPS o localhost per attivare il microfono', 'error');
-                        return;
-                    }
-                    const stream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, autoGainControl: true } });
-                    stream.getTracks().forEach(t => t.stop());
-                    setTimeout(() => { if (this.microphoneEnabled) this.startListening(); }, this.desktopFix.isDesktop ? 2000 : 1000);
-                } catch (error) {
-                    this.showToast('Permessi microfono richiesti per funzionare', 'error');
-                }
-            }
-
-            startListening() {
-                if (this.recognition && !this.isListening && this.microphoneEnabled) {
-                    try { this.recognition.start(); } catch (error) {
-                        this.desktopFix.consecutiveErrors++;
-                        const retryDelay = this.desktopFix.isDesktop ? 3000 : 2000;
-                        setTimeout(() => {
-                            if (!this.isListening && this.autoRestartEnabled && this.desktopFix.consecutiveErrors < 5 && this.microphoneEnabled && !this.isSpeaking) {
-                                this.startListening();
-                            }
-                        }, retryDelay);
-                    }
-                }
-            }
-
-            stopListening() {
-                if (this.recognition && this.isListening) {
-                    this.recognition.stop();
-                    if (this.restartTimeout) { clearTimeout(this.restartTimeout); this.restartTimeout = null; }
-                }
-            }
-
-            toggleMicrophone() {
-                if (this.microphoneEnabled) {
-                    this.microphoneEnabled = false; this.autoRestartEnabled = false; this.stopListening();
-                    this.showToast('Microfono disattivato', 'error');
-                } else {
-                    this.microphoneEnabled = true; this.autoRestartEnabled = true;
-                    this.desktopFix.currentRetries = 0; this.desktopFix.consecutiveErrors = 0;
-                    this.startListening(); this.showToast('Microfono attivato', 'success');
-                }
-                this.updateMicrophoneUI();
-            }
-
-            updateMicrophoneUI() {
-                if (!this.microphoneEnabled) {
-                    this.microphoneButton.classList.remove('listening');
-                    this.microphoneButton.classList.add('disabled');
-                    this.microphoneStatus.textContent = 'Microfono disattivato - Clicca per attivare';
-                    this.microphoneStatus.classList.remove('active');
-                    this.microphoneStatus.classList.add('disabled');
-                } else if (this.isListening) {
-                    this.microphoneButton.classList.add('listening');
-                    this.microphoneButton.classList.remove('disabled');
-                    this.microphoneStatus.textContent = 'Microfono attivo - Parla ora';
-                    this.microphoneStatus.classList.add('active');
-                    this.microphoneStatus.classList.remove('disabled');
-                } else {
-                    this.microphoneButton.classList.remove('listening', 'disabled');
-                    this.microphoneStatus.textContent = 'Microfono sempre attivo';
-                    this.microphoneStatus.classList.remove('active', 'disabled');
-                }
-            }
-
-            pauseRecognition(){
-                this.wasListeningPreTts = this.isListening;
-                if (this.isListening) this.stopListening();
-                this.resumeAfterTts = true;
-            }
-            resumeRecognitionSafe(){
-                setTimeout(()=>{
-                  if (this.resumeAfterTts && this.wasListeningPreTts) {
-                    if (this.microphoneEnabled && !this.isListening) this.startListening();
-                  }
-                  this.resumeAfterTts = false;
-                  this.wasListeningPreTts = false;
-                }, this.postTtsCooldownMs);
-            }
-
-            processVoiceInput(text) {
-                this.isProcessing = true;
-                this.addMessage(text, 'user');
-                this.sendToAssistant(text);
-                setTimeout(() => { this.isProcessing = false; }, 3000);
-            }
-
-            addMessage(content, type) {
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${type}`;
-                messageDiv.textContent = content;
-                this.chatContainer.appendChild(messageDiv);
-                this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
-            }
-
-            sendMessage() {
-                const message = this.chatInput.value.trim();
-                if (message) {
-                    this.addMessage(message, 'user');
-                    this.sendToAssistant(message);
-                    this.chatInput.value = '';
-                }
-            }
-
-            async sendToAssistant(message) {
-                this.showTyping();
-                try {
-                    this.conversationHistory.push({ role: 'user', content: message });
-
-                    const apiResponse = await fetch('/api/chat', {
-                      method: 'POST',
-                      headers: { 'Content-Type': 'application/json' },
-                      body: JSON.stringify({ messages: this.conversationHistory.slice(-10) })
-                    });
-                    if (!apiResponse.ok) throw new Error(`API Error: ${apiResponse.status}`);
-
-                    const data = await apiResponse.json();
-                    const response = data.content || this.getDemoResponse(message);
-
-                    this.conversationHistory.push({ role: 'assistant', content: response });
-                    this.hideTyping();
-                    this.addMessage(response, 'assistant');
-
-                    this.ignoreAsrUntil = Date.now() + 2000;
-                    await this.speakWithElevenLabs(response);
-
-                    if (this.conversationHistory.length > 40) {
-                        this.conversationHistory = this.conversationHistory.slice(-20);
-                    }
-
-                } catch (error) {
-                    console.warn('sendToAssistant error:', error);
-                    this.hideTyping();
-                    const demoResponse = this.getDemoResponse(message);
-                    this.addMessage(demoResponse, 'assistant');
-                    this.ignoreAsrUntil = Date.now() + 2000;
-                    this.speakWithNativeTTS(demoResponse);
-                }
-            }
-
-            // ElevenLabs via server + fallback nativo
-            async speakWithElevenLabs(text) {
-                try {
-                    const cleanText = text.replace(/[🔥💙✅❌⚠️🆘🎤💬🔒]/g, '').trim() || ' ';
-                    const response = await fetch('/api/tts', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ text: cleanText, voiceId: this.voiceId })
-                    });
-                    if (!response.ok) throw new Error(`TTS API Error: ${response.status}`);
-
-                    const audioBlob = await response.blob();
-                    const audioUrl = URL.createObjectURL(audioBlob);
-                    const audio = new Audio(audioUrl);
-                    audio.volume = 0.8;
-                    audio.onplay = () => { this.isSpeaking = true; this.pauseRecognition(); };
-                    audio.onended = () => { URL.revokeObjectURL(audioUrl); this.isSpeaking = false; this.resumeRecognitionSafe(); };
-                    audio.onerror = () => {
-                        URL.revokeObjectURL(audioUrl);
-                        this.isSpeaking = false;
-                        this.resumeRecognitionSafe();
-                        this.speakWithNativeTTS(text);
-                    };
-                    await audio.play();
-                } catch (e) {
-                    console.warn('ElevenLabs playback error:', e);
-                    this.isSpeaking = false;
-                    this.resumeRecognitionSafe();
-                    this.speakWithNativeTTS(text);
-                }
-            }
-
-            // Voce nativa
-            initVoicesOnce() {
-                if (!('speechSynthesis' in window)) return;
-                const assign = () => {
-                    const voices = speechSynthesis.getVoices();
-                    const it = voices.find(v => v.lang && v.lang.toLowerCase().startsWith('it'));
-                    this._italianVoice = it || null;
-                };
-                assign();
-                try { window.speechSynthesis.addEventListener('voiceschanged', assign, { once: true }); } catch {}
-            }
-
-            speakWithNativeTTS(text) {
-                if ('speechSynthesis' in window) {
-                    speechSynthesis.cancel();
-                    const utterance = new SpeechSynthesisUtterance(text);
-                    utterance.lang = 'it-IT';
-                    utterance.rate = 0.85;
-                    utterance.pitch = 1.1;
-                    utterance.volume = 0.8;
-
-                    if (this._italianVoice) utterance.voice = this._italianVoice;
-
-                    utterance.onstart = () => { this.isSpeaking = true; this.pauseRecognition(); };
-                    utterance.onend = () => { this.isSpeaking = false; this.resumeRecognitionSafe(); };
-                    utterance.onerror = () => { this.isSpeaking = false; this.resumeRecognitionSafe(); };
-                    
-                    speechSynthesis.speak(utterance);
-                }
-            }
-
-            getDemoResponse(message) {
-                const responses = [
-                    "Ti ascolto e capisco quello che stai vivendo. È normale sentirsi così a volte.",
-                    "Grazie per aver condiviso questo con me. Come ti senti ora dopo averlo espresso?",
-                    "Quello che provi è valido e importante. Vuoi parlarmi di più di questa situazione?",
-                    "Ti sono vicina in questo momento. Ricorda che non sei solo in questo percorso.",
-                    "È un passo importante quello di parlarne. Come posso aiutarti a sentirti meglio?",
-                    "Comprendo la tua preoccupazione. Insieme possiamo trovare delle strategie per affrontarla.",
-                    "Le tue emozioni sono importanti. Prenditi il tempo che ti serve per elaborarle.",
-                    "Sono qui per ascoltarti senza giudicare. Cosa ti passa per la mente in questo momento?",
-                    "Capisco che possa essere difficile. Vuoi provare a respirare insieme per qualche minuto?",
-                    "La tua esperienza è unica e preziosa. Come posso supportarti meglio oggi?"
-                ];
-
-                const lowerMessage = message.toLowerCase();
-                if (lowerMessage.includes('suicid') || lowerMessage.includes('morte') || lowerMessage.includes('farla finita')) {
-                    return "Mi preoccupo molto per te. È fondamentale che tu parli immediatamente con un professionista qualificato. Contatta il tuo medico, un centro di salute mentale o i servizi di emergenza. La tua vita ha un valore immenso e ci sono persone pronte ad aiutarti. 🆘";
-                }
-                if (lowerMessage.includes('panico') || lowerMessage.includes('ansia') || lowerMessage.includes('attacco')) {
-                    return "Capisco che stai attraversando un momento molto difficile. Proviamo insieme: inspira lentamente per 4 secondi, trattieni il respiro per 4, poi espira per 6 secondi. Ripeti questo ciclo. Se gli attacchi sono frequenti, è importante consultare un professionista. Sono qui con te. 💙";
-                }
-                if (lowerMessage.includes('solo') || lowerMessage.includes('abbandon') || lowerMessage.includes('isolat')) {
-                    return "Non sei davvero solo, anche se ora può sembrare così. I sentimenti di solitudine sono dolorosi ma temporanei. Ci sono persone che si preoccupano per te, anche se non sempre è evidente. Vuoi parlare di cosa ti fa sentire più isolato?";
-                }
-                return responses[Math.floor(Math.random() * responses.length)];
-            }
-
-            showTyping() {
-                this.typingIndicator.style.display = 'flex';
-                this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
-            }
-
-            hideTyping() {
-                this.typingIndicator.style.display = 'none';
-            }
-
-            applyTheme() {
-                if (this.isDarkMode) { document.body.classList.add('dark-mode'); this.themeToggle.textContent = '☀️'; }
-                else { document.body.classList.remove('dark-mode'); this.themeToggle.textContent = '🌙'; }
-            }
-
-            toggleTheme() {
-                this.isDarkMode = !this.isDarkMode;
-                localStorage.setItem('aluia_theme', this.isDarkMode ? 'dark' : 'light');
-                this.applyTheme();
-                this.showToast(`Tema ${this.isDarkMode ? 'scuro' : 'chiaro'} attivato`);
-            }
-
-            showPrivacyModal() { this.privacyModal.style.display = 'block'; }
-            hidePrivacyModal() { this.privacyModal.style.display = 'none'; }
-            showAdminModal() {
-                document.getElementById('assistantId').value = this.assistantId;
-                document.getElementById('voiceId').value = this.voiceId;
-                this.adminModal.style.display = 'block';
-            }
-            hideAdminModal() { this.adminModal.style.display = 'none'; }
-
-            saveAdminConfig() {
-                const assistantId = document.getElementById('assistantId').value.trim();
-                const voiceId = document.getElementById('voiceId').value.trim();
-                
-                this.assistantId = assistantId;
-                this.voiceId = voiceId || this.voiceId;
-                
-                localStorage.setItem('aluia_assistant_id', this.assistantId);
-                localStorage.setItem('aluia_voice_id', this.voiceId);
-                
-                this.hideAdminModal();
-                this.showToast('Configurazione salvata', 'success');
-            }
-
-            showToast(message, type = 'success') {
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.textContent = message;
-                document.body.appendChild(toast);
-
-                setTimeout(() => toast.classList.add('show'), 100);
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                    setTimeout(() => { if (document.body.contains(toast)) document.body.removeChild(toast); }, 300);
-                }, 4000);
-            }
+      }
+
+      handleSpeechErrorAdvanced(error){
+        if(this.restartTimeout) clearTimeout(this.restartTimeout);
+        let restartDelay = this.desktopFix.adaptiveDelay;
+        let shouldRestart = true;
+
+        if(this.desktopFix.consecutiveErrors > 2){
+          restartDelay = Math.min(8000, this.desktopFix.adaptiveDelay * Math.pow(1.5, this.desktopFix.consecutiveErrors-2));
         }
+        switch(error){
+          case 'not-allowed':
+            this.autoRestartEnabled=false; shouldRestart=false;
+            this.showToast('Permessi microfono negati. Clicca il microfono per riprovare.','error'); break;
+          case 'audio-capture':
+            if(this.desktopFix.consecutiveErrors>2){ shouldRestart=false; this.showToast('Problema con il microfono. Controlla le impostazioni.','error'); }
+            else restartDelay=3000; break;
+          default: break;
+        }
+        const timeSinceSuccess = Date.now()-this.desktopFix.lastSuccessTime;
+        if(timeSinceSuccess>60000 && this.desktopFix.consecutiveErrors>3) shouldRestart=false;
 
-        document.addEventListener('DOMContentLoaded', () => {
-            window.aluia = new AluIA();
+        if(shouldRestart && this.autoRestartEnabled && this.microphoneEnabled && !this.isSpeaking){
+          this.restartTimeout = setTimeout(()=>{
+            if(this.autoRestartEnabled && !this.isListening && this.microphoneEnabled && !this.isSpeaking){
+              this.startListening();
+            }
+          }, restartDelay);
+        }
+        this.isListening=false;
+        this.updateMicrophoneUI();
+      }
+
+      scheduleSmartRestart(){
+        let delay = this.desktopFix.isDesktop ? 2500 : 1500;
+        if(this.desktopFix.consecutiveErrors>0) delay += this.desktopFix.consecutiveErrors*500;
+        delay = Math.min(delay, 6000);
+        this.restartTimeout = setTimeout(()=>{
+          if(this.autoRestartEnabled && !this.isListening && !this.isProcessing && this.microphoneEnabled && !this.isSpeaking){
+            this.startListening();
+          }
+        }, delay);
+      }
+
+      initEventListeners(){
+        this.microphoneButton?.addEventListener('click',()=>this.toggleMicrophone());
+        this.sendButton?.addEventListener('click',()=>this.sendMessage());
+        this.chatInput?.addEventListener('keypress',(e)=>{ if(e.key==='Enter') this.sendMessage(); });
+        this.themeToggle?.addEventListener('click',()=>this.toggleTheme());
+
+        document.getElementById('privacyButton')?.addEventListener('click',()=>this.showPrivacyModal());
+        document.getElementById('closePrivacy')?.addEventListener('click',()=>this.hidePrivacyModal());
+        document.getElementById('closeAdmin')?.addEventListener('click',()=>this.hideAdminModal());
+
+        document.addEventListener('click',(e)=>{
+          if(e.target===this.privacyModal) this.hidePrivacyModal();
+          if(e.target===this.adminModal) this.hideAdminModal();
         });
+        document.addEventListener('keydown',(e)=>{
+          if(e.key==='Escape'){ this.hidePrivacyModal(); this.hideAdminModal(); }
+        });
+        document.addEventListener('dblclick',(e)=>{
+          if(e.target===document.body){
+            const code = prompt('Codice amministratore:');
+            if(code==='ALUIA2025'){
+              this.adminBtn.style.display='block';
+              this.showToast('Modalità amministratore attivata','success');
+            }
+          }
+        });
+        this.adminBtn?.addEventListener('click',()=>this.showAdminModal());
 
-        window.testMic = () => window.aluia?.toggleMicrophone();
-        window.testChat = () => { const a=window.aluia; if (!a) return; a.chatInput.value="Ciao Alu, questo è un test"; a.sendMessage(); };
-        window.debugMic = () => { const a=window.aluia; console.log({ isListening:a?.isListening, microphoneEnabled:a?.microphoneEnabled, isProcessing:a?.isProcessing, autoRestartEnabled:a?.autoRestartEnabled, isSpeaking:a?.isSpeaking }); };
-        window.resetMic = () => { const a=window.aluia; if (!a) return; a.microphoneEnabled = true; a.autoRestartEnabled = true; a.stopListening(); setTimeout(() => { a.startListening(); a.showToast('Microfono resettato', 'success'); }, 1200); };
-    </script>
+        document.addEventListener('visibilitychange',()=>{
+          if(document.hidden){
+            if(this.isListening){ this.autoRestartEnabled=false; this.stopListening(); }
+          } else {
+            setTimeout(()=>{
+              this.autoRestartEnabled=true; this.desktopFix.consecutiveErrors=0;
+              if(!this.isListening && this.microphoneEnabled && !this.isSpeaking){ this.startListening(); }
+            },1000);
+          }
+        });
+      }
 
+      async startAutoListening(){
+        try{
+          if(!isSecureLikeContext()){
+            this.showToast('Apri la pagina in HTTPS o localhost per attivare il microfono','error');
+            return;
+          }
+          const stream = await navigator.mediaDevices.getUserMedia({audio:{echoCancellation:true,noiseSuppression:true,autoGainControl:true}});
+          stream.getTracks().forEach(t=>t.stop());
+          setTimeout(()=>{ if(this.microphoneEnabled) this.startListening(); }, this.desktopFix.isDesktop?2000:1000);
+        }catch(error){
+          this.showToast('Permessi microfono richiesti per funzionare','error');
+        }
+      }
+
+      startListening(){
+        if(this.recognition && !this.isListening && this.microphoneEnabled){
+          try{ this.recognition.start(); }
+          catch(error){
+            this.desktopFix.consecutiveErrors++;
+            const retryDelay = this.desktopFix.isDesktop?3000:2000;
+            setTimeout(()=>{
+              if(!this.isListening && this.autoRestartEnabled && this.desktopFix.consecutiveErrors<5 && this.microphoneEnabled && !this.isSpeaking){
+                this.startListening();
+              }
+            }, retryDelay);
+          }
+        }
+      }
+
+      stopListening(){
+        if(this.recognition && this.isListening){
+          this.recognition.stop();
+          if(this.restartTimeout){ clearTimeout(this.restartTimeout); this.restartTimeout=null; }
+        }
+      }
+
+      toggleMicrophone(){
+        if(this.microphoneEnabled){
+          this.microphoneEnabled=false; this.autoRestartEnabled=false; this.stopListening();
+          this.showToast('Microfono disattivato','error');
+        }else{
+          this.microphoneEnabled=true; this.autoRestartEnabled=true;
+          this.desktopFix.currentRetries=0; this.desktopFix.consecutiveErrors=0;
+          this.startListening(); this.showToast('Microfono attivato','success');
+        }
+        this.updateMicrophoneUI();
+      }
+
+      updateMicrophoneUI(){
+        if(!this.microphoneEnabled){
+          this.microphoneButton.classList.remove('listening');
+          this.microphoneButton.classList.add('disabled');
+          this.microphoneStatus.textContent='Microfono disattivato - Clicca per attivare';
+          this.microphoneStatus.classList.remove('active');
+          this.microphoneStatus.classList.add('disabled');
+        }else if(this.isListening){
+          this.microphoneButton.classList.add('listening');
+          this.microphoneButton.classList.remove('disabled');
+          this.microphoneStatus.textContent='Microfono attivo - Parla ora';
+          this.microphoneStatus.classList.add('active');
+          this.microphoneStatus.classList.remove('disabled');
+        }else{
+          this.microphoneButton.classList.remove('listening','disabled');
+          this.microphoneStatus.textContent='Microfono sempre attivo';
+          this.microphoneStatus.classList.remove('active','disabled');
+        }
+      }
+
+      // pause/resume during TTS
+      pauseRecognition(){
+        this.wasListeningPreTts = this.isListening;
+        if(this.isListening) this.stopListening();
+        this.resumeAfterTts = true;
+      }
+      resumeRecognitionSafe(){
+        setTimeout(()=>{
+          if(this.resumeAfterTts && this.wasListeningPreTts){
+            if(this.microphoneEnabled && !this.isListening) this.startListening();
+          }
+          this.resumeAfterTts=false; this.wasListeningPreTts=false;
+        }, this.postTtsCooldownMs);
+      }
+
+      // ===== Chat
+      processVoiceInput(text){
+        this.isProcessing = true;
+        this.addMessage(text,'user');
+        this.sendToAssistant(text);
+        setTimeout(()=>{ this.isProcessing=false; },3000);
+      }
+
+      addMessage(content,type){
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${type}`;
+        messageDiv.textContent = content;
+        this.chatContainer.appendChild(messageDiv);
+        this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
+      }
+
+      sendMessage(){
+        const message = this.chatInput.value.trim();
+        if(message){
+          this.addMessage(message,'user');
+          this.sendToAssistant(message);
+          this.chatInput.value = '';
+        }
+      }
+
+      async sendToAssistant(message){
+        this.showTyping();
+        try{
+          this.conversationHistory.push({role:'user',content:message});
+          const res = await fetch('/api/chat',{
+            method:'POST',
+            headers:{'Content-Type':'application/json','Accept':'application/json'},
+            body:JSON.stringify({
+              messages:this.conversationHistory.slice(-10),
+              assistantId:this.assistantId || undefined
+            })
+          });
+          if(!res.ok){
+            this.setStatus('error','❌ Errore chat: ' + res.status);
+            throw new Error('API Error ' + res.status);
+          }
+          const data = await res.json();
+          // accetta più formati
+          const response =
+              data?.content ??
+              data?.message ??
+              data?.reply ??
+              (Array.isArray(data?.choices) ? data.choices?.[0]?.message?.content : undefined) ??
+              this.getDemoResponse(message);
+
+          this.setStatus('connected','✅ Connesso a GPT');
+          this.conversationHistory.push({role:'assistant',content:response});
+          this.hideTyping();
+          this.addMessage(response,'assistant');
+
+          // TTS
+          this.ignoreAsrUntil = Date.now() + 2000;
+          await this.speakWithElevenLabs(response);
+
+          if(this.conversationHistory.length>40){
+            this.conversationHistory = this.conversationHistory.slice(-20);
+          }
+        }catch(err){
+          console.warn('sendToAssistant error:',err);
+          this.hideTyping();
+          const fallback = this.getDemoResponse(message);
+          this.addMessage(fallback,'assistant');
+          this.ignoreAsrUntil = Date.now() + 2000;
+          this.speakWithNativeTTS(fallback);
+          if(String(err).includes('Failed to fetch') || String(err).includes('API Error')){
+            this.setStatus('error','❌ Backend chat non raggiungibile');
+            this.showToast('Endpoint /api/chat non raggiungibile. Controlla il server.', 'error');
+          }
+        }
+      }
+
+      // ===== TTS
+      async speakWithElevenLabs(text){
+        try{
+          const cleanText = (text||'').replace(/[🔥💙✅❌⚠️🆘🎤💬🔒]/g,'').trim() || ' ';
+          const res = await fetch('/api/tts',{
+            method:'POST',
+            headers:{'Content-Type':'application/json'},
+            body:JSON.stringify({text:cleanText,voiceId:this.voiceId||undefined})
+          });
+          if(!res.ok) throw new Error('TTS API ' + res.status);
+          const audioBlob = await res.blob();
+          const url = URL.createObjectURL(audioBlob);
+          const audio = new Audio(url);
+          audio.volume = 0.8;
+          audio.onplay = ()=>{ this.isSpeaking=true; this.pauseRecognition(); };
+          audio.onended = ()=>{ URL.revokeObjectURL(url); this.isSpeaking=false; this.resumeRecognitionSafe(); };
+          audio.onerror = ()=>{ URL.revokeObjectURL(url); this.isSpeaking=false; this.resumeRecognitionSafe(); this.speakWithNativeTTS(text); };
+          await audio.play();
+          this.setStatus('elevenlabs','🔊 Voce ElevenLabs attiva');
+        }catch(e){
+          console.warn('TTS error, uso voce nativa:',e);
+          this.speakWithNativeTTS(text);
+          this.showToast('Voce esterna non disponibile: uso quella di sistema','error');
+        }
+      }
+
+      initVoicesOnce(){
+        if(!('speechSynthesis' in window)) return;
+        const assign = ()=>{
+          const voices = speechSynthesis.getVoices();
+          const it = voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('it'));
+          this._italianVoice = it || null;
+        };
+        assign();
+        try{ window.speechSynthesis.addEventListener('voiceschanged',assign,{once:true}); }catch{}
+      }
+
+      speakWithNativeTTS(text){
+        if(!('speechSynthesis' in window)) return;
+        speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        u.lang='it-IT'; u.rate=0.85; u.pitch=1.1; u.volume=0.8;
+        if(this._italianVoice) u.voice=this._italianVoice;
+        u.onstart = ()=>{ this.isSpeaking=true; this.pauseRecognition(); };
+        u.onend   = ()=>{ this.isSpeaking=false; this.resumeRecognitionSafe(); };
+        u.onerror = ()=>{ this.isSpeaking=false; this.resumeRecognitionSafe(); };
+        speechSynthesis.speak(u);
+      }
+
+      // ===== Demo fallback text
+      getDemoResponse(message){
+        const responses=[
+          "Ti ascolto e capisco quello che stai vivendo. È normale sentirsi così a volte.",
+          "Grazie per aver condiviso questo con me. Come ti senti ora dopo averlo espresso?",
+          "Quello che provi è valido e importante. Vuoi parlarmi di più di questa situazione?",
+          "Ti sono vicina in questo momento. Ricorda che non sei solo in questo percorso.",
+          "È un passo importante quello di parlarne. Come posso aiutarti a sentirti meglio?",
+          "Comprendo la tua preoccupazione. Insieme possiamo trovare delle strategie per affrontarla.",
+          "Le tue emozioni sono importanti. Prenditi il tempo che ti serve per elaborarle.",
+          "Sono qui per ascoltarti senza giudicare. Cosa ti passa per la mente in questo momento?",
+          "Capisco che possa essere difficile. Vuoi provare a respirare insieme per qualche minuto?",
+          "La tua esperienza è unica e preziosa. Come posso supportarti meglio oggi?"
+        ];
+        const lower = (message||'').toLowerCase();
+        if(lower.includes('suicid')||lower.includes('morte')||lower.includes('farla finita')){
+          return "Mi preoccupo molto per te. È fondamentale che tu parli immediatamente con un professionista qualificato. Contatta il tuo medico, un centro di salute mentale o i servizi di emergenza. La tua vita ha un valore immenso e ci sono persone pronte ad aiutarti. 🆘";
+        }
+        if(lower.includes('panico')||lower.includes('ansia')||lower.includes('attacco')){
+          return "Capisco che stai attraversando un momento molto difficile. Proviamo insieme: inspira lentamente per 4 secondi, trattieni per 4, poi espira per 6. Ripeti. Se gli attacchi sono frequenti, confrontati con un professionista. 💙";
+        }
+        if(lower.includes('solo')||lower.includes('abbandon')||lower.includes('isolat')){
+          return "Non sei davvero solo, anche se ora può sembrare così. I sentimenti di solitudine sono dolorosi ma temporanei. Vuoi dirmi cosa ti fa sentire più isolato?";
+        }
+        return responses[Math.floor(Math.random()*responses.length)];
+      }
+
+      // ===== Theme & modals
+      applyTheme(){
+        if(this.isDarkMode){ document.body.classList.add('dark-mode'); this.themeToggle.textContent='☀️'; }
+        else{ document.body.classList.remove('dark-mode'); this.themeToggle.textContent='🌙'; }
+      }
+      toggleTheme(){
+        this.isDarkMode = !this.isDarkMode;
+        localStorage.setItem('aluia_theme', this.isDarkMode?'dark':'light');
+        this.applyTheme();
+        this.showToast(`Tema ${this.isDarkMode?'scuro':'chiaro'} attivato`);
+      }
+
+      showPrivacyModal(){ this.privacyModal.style.display='block'; }
+      hidePrivacyModal(){ this.privacyModal.style.display='none'; }
+      showAdminModal(){
+        document.getElementById('assistantId').value = this.assistantId;
+        document.getElementById('voiceId').value = this.voiceId;
+        this.adminModal.style.display='block';
+      }
+      hideAdminModal(){ this.adminModal.style.display='none'; }
+
+      saveAdminConfig(){
+        const assistantId = document.getElementById('assistantId').value.trim();
+        const voiceId = document.getElementById('voiceId').value.trim();
+        this.assistantId = assistantId;
+        this.voiceId = voiceId || this.voiceId;
+        localStorage.setItem('aluia_assistant_id', this.assistantId);
+        localStorage.setItem('aluia_voice_id', this.voiceId);
+        this.hideAdminModal();
+        this.showToast('Configurazione salvata','success');
+      }
+
+      // ===== misc
+      showTyping(){ this.typingIndicator.style.display='flex'; this.chatContainer.scrollTop=this.chatContainer.scrollHeight; }
+      hideTyping(){ this.typingIndicator.style.display='none'; }
+      showToast(message,type='success'){
+        const t=document.createElement('div');
+        t.className=`toast ${type}`; t.textContent=message;
+        document.body.appendChild(t);
+        setTimeout(()=>t.classList.add('show'),100);
+        setTimeout(()=>{ t.classList.remove('show'); setTimeout(()=>{ if(document.body.contains(t)) document.body.removeChild(t); },300); },4000);
+      }
+    }
+
+    document.addEventListener('DOMContentLoaded',()=>{ window.aluia = new AluIA(); });
+
+    // debug helpers
+    window.testMic = ()=> window.aluia?.toggleMicrophone();
+    window.testChat = ()=>{ const a=window.aluia; if(!a) return; a.chatInput.value="Ciao Alu, questo è un test"; a.sendMessage(); };
+    window.debugMic = ()=>{ const a=window.aluia; console.log({isListening:a?.isListening,microphoneEnabled:a?.microphoneEnabled,isProcessing:a?.isProcessing,autoRestartEnabled:a?.autoRestartEnabled,isSpeaking:a?.isSpeaking});};
+    window.resetMic = ()=>{ const a=window.aluia; if(!a) return; a.microphoneEnabled=true; a.autoRestartEnabled=true; a.stopListening(); setTimeout(()=>{ a.startListening(); a.showToast('Microfono resettato','success'); },1200); };
+  </script>
 </body>
 </html>
