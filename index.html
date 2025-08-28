@@ -633,7 +633,7 @@
                     if (!this.isApiConfigured) {
                         response = this.getDemoResponse(message);
                     } else {
-                        const apiResponse = await const apiResponse = await fetch('/api/chat', {   method: 'POST',   headers: { 'Content-Type': 'application/json' },   body: JSON.stringify({ messages: this.conversationHistory.slice(-10) }) });, {
+                        const apiResponse = await fetch('/api/chat', {   method: 'POST',   headers: { 'Content-Type': 'application/json' },   body: JSON.stringify({ messages: this.conversationHistory.slice(-10) }) });'/api/chat', {   method: 'POST',   headers: { 'Content-Type': 'application/json' },   body: JSON.stringify({ messages: this.conversationHistory.slice(-10) }) });, {
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
@@ -692,13 +692,13 @@
                     const cleanText = text.replace(/[🔥💙✅❌⚠️🆘🎤💬🔒]/g, '').trim() || ' ';
                     const ctrl = new AbortController();
                     const tid = setTimeout(() => ctrl.abort('timeout'), 12000);
-                    const response = await const response = await fetch('/api/tts', {   method: 'POST',   headers: { 'Content-Type': 'application/json' },   body: JSON.stringify({ text: cleanText, voiceId: this.voiceId }) });
+                    const response = await fetch('/api/tts', {   method: 'POST',   headers: { 'Content-Type': 'application/json' },   body: JSON.stringify({ text: cleanText, voiceId: this.voiceId }) });'/api/tts', {   method: 'POST',   headers: { 'Content-Type': 'application/json' },   body: JSON.stringify({ text: cleanText, voiceId: this.voiceId }) });
                         method: 'POST',
                         signal: ctrl.signal,
                         headers: {
                             'Accept': 'audio/mpeg',
                             'Content-Type': 'application/json',
-                            'xi-api-key': this.elevenLabsKey
+                        
                         },
                         body: JSON.stringify({
                             text: cleanText,
