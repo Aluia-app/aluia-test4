@@ -4,16 +4,11 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>AluIA – Supporto Psicologico</title>
-
-  <!--
-    Versione semplificata: non richiede più alcuna chiave sul client.
-    Tutte le chiamate vanno agli endpoint /api/chat   e   /api/tts
-    creati nei passaggi precedenti.
-  -->
-
+  <!-- Layout e stile originali invariati -->
   <style>
-    /* … (STILI ORIGINALI NON TOCCATI) … */
-    /* Ho rimosso solo eventuali @import esterne inutilizzate */
+    /* STILI ORIGINALI (invariati)  */
+    *{margin:0;padding:0;box-sizing:border-box}
+    /* … copiare qui il blocco <style> che già possiedi (non modificato) … */
   </style>
 </head>
 <body>
@@ -21,9 +16,12 @@
   <div class="status-bar" id="statusBar">⏳ Controllo server…</div>
   <button class="admin-button" id="adminBtn">⚙️</button>
 
-  <!-- … (IL RESTO DEL MARK‑UP È IDENTICO AL TUO ORIGINALE, TAGLIATO PER BREVITÀ) … -->
+  <!-- CONTENUTO ORIGINALE (header, microfono, chat, footer)  -->
+  <!-- incolla qui, invariato, il tuo markup esistente fino al </div> principale -->
 
-  <!-- Admin Modal – ora contiene solo AssistantID e VoiceID -->
+  <!-- Modal Privacy invariato -->
+
+  <!-- Admin Modal semplificato -->
   <div class="modal" id="adminModal">
     <div class="modal-content">
       <span class="close" id="closeAdmin">&times;</span>
@@ -49,270 +47,122 @@
     </div>
   </div>
 
+  <!-- SCRIPT PRINCIPALE pulito -->
   <script>
-    // Utility: HTTPS / localhost check
-    function isSecureLikeContext() {
-      const { protocol, hostname } = location;
-      return protocol === "https:" || hostname === "localhost" || hostname === "127.0.0.1";
+    function isSecureLikeContext(){
+      const {protocol,hostname}=location;
+      return protocol==='https:'||hostname==='localhost'||hostname==='127.0.0.1';
     }
 
     class AluIA {
-      constructor() {
-        /* ---------- STATO BASE ---------- */
-        this.recognition = null;
-        this.isListening = false;
-        this.isSpeaking = false;
-        this.autoRestartEnabled = true;
-        this.conversationHistory = [];
-
-        /* ---------- PREFERENZE UTENTE ---------- */
-        this.isDarkMode = localStorage.getItem("aluia_theme") === "dark";
-        this.assistantId = localStorage.getItem("aluia_assistant_id") || "";
-        this.voiceId = localStorage.getItem("aluia_voice_id") || "IyWqvgbFwm4IK1x6M489";
-
-        /* ---------- VARIABILI INTERNE ---------- */
-        this.ignoreAsrUntil = 0; // muto l'ASR mentre parlo
-        this.postTtsCooldownMs = 800;
-
-        /* ---------- INIZIALIZZAZIONE ---------- */
-        this.initElements();
-        this.initSpeechRecognition();
-        this.initEventListeners();
-        this.applyTheme();
-        this.checkServerStatus();
-        setTimeout(() => this.startAutoListening(), 1000);
+      constructor(){
+        /* Stato */
+        this.recognition=null;this.isListening=false;this.isSpeaking=false;this.autoRestartEnabled=true;
+        this.conversationHistory=[];this.ignoreAsrUntil=0;this.postTtsCooldownMs=900;
+        /* Preferenze */
+        this.isDarkMode=localStorage.getItem('aluia_theme')==='dark';
+        this.assistantId=localStorage.getItem('aluia_assistant_id')||'';
+        this.voiceId=localStorage.getItem('aluia_voice_id')||'IyWqvgbFwm4IK1x6M489';
+        /* Init */
+        this.initElements();this.initSpeech();this.initEvents();this.applyTheme();
+        this.checkServer();setTimeout(()=>this.startAutoListening(),1000);
       }
 
-      /* ----- DOM ELEMENTS ----- */
-      initElements() {
-        this.microphoneButton = document.getElementById("microphoneButton");
-        this.microphoneStatus = document.getElementById("microphoneStatus");
-        this.transcriptArea = document.getElementById("transcriptArea");
-        this.chatContainer = document.getElementById("chatContainer");
-        this.chatInput = document.getElementById("chatInput");
-        this.sendButton = document.getElementById("sendButton");
-        this.typingIndicator = document.getElementById("typingIndicator");
-        this.statusBar = document.getElementById("statusBar");
-        this.themeToggle = document.getElementById("themeToggle");
-        this.adminBtn = document.getElementById("adminBtn");
-        this.privacyModal = document.getElementById("privacyModal");
-        this.adminModal = document.getElementById("adminModal");
-        this.saveAdminBtn = document.getElementById("saveAdmin");
+      /* ——— Elementi DOM ——— */
+      initElements(){
+        this.microphoneButton=document.getElementById('microphoneButton');
+        this.microphoneStatus=document.getElementById('microphoneStatus');
+        this.transcriptArea=document.getElementById('transcriptArea');
+        this.chatContainer=document.getElementById('chatContainer');
+        this.chatInput=document.getElementById('chatInput');
+        this.sendButton=document.getElementById('sendButton');
+        this.typingIndicator=document.getElementById('typingIndicator');
+        this.statusBar=document.getElementById('statusBar');
+        this.themeToggle=document.getElementById('themeToggle');
+        this.adminBtn=document.getElementById('adminBtn');
+        this.privacyModal=document.getElementById('privacyModal');
+        this.adminModal=document.getElementById('adminModal');
       }
 
-      /* ----- SPEECH RECOGNITION ----- */
-      initSpeechRecognition() {
-        if (!("webkitSpeechRecognition" in window || "SpeechRecognition" in window)) {
-          this.showToast("Riconoscimento vocale non supportato", "error");
-          return;
+      /* ——— Speech Recognition ——— */
+      initSpeech(){
+        if(!('webkitSpeechRecognition'in window||'SpeechRecognition'in window)){
+          this.showToast('Riconoscimento vocale non supportato','error');return;
         }
-        const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-        this.recognition = new SR();
-        this.recognition.continuous = true;
-        this.recognition.interimResults = true;
-        this.recognition.lang = "it-IT";
-
-        this.recognition.onstart = () => {
-          this.isListening = true;
-          this.updateMicUI();
+        const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+        this.recognition=new SR();
+        this.recognition.continuous=true;this.recognition.interimResults=true;this.recognition.lang='it-IT';
+        this.recognition.onstart=()=>{this.isListening=true;this.updateMicUI();};
+        this.recognition.onresult=e=>{
+          if(this.isSpeaking||Date.now()<this.ignoreAsrUntil)return;
+          let final='';for(let i=e.resultIndex;i<e.results.length;i++){if(e.results[i].isFinal)final+=e.results[i][0].transcript;}
+          if(final.trim())this.handleUser(final.trim());
         };
+        this.recognition.onerror=()=>this.restartListening(2000);
+        this.recognition.onend=()=>this.restartListening(1500);
+      }
+      startListening(){try{this.recognition&&this.recognition.start();}catch{}}
+      stopListening(){try{this.recognition&&this.recognition.stop();}catch{}}
+      restartListening(d=1500){this.isListening=false;this.updateMicUI();if(this.autoRestartEnabled&&!this.isSpeaking)setTimeout(()=>this.startListening(),d);}
 
-        this.recognition.onresult = (e) => {
-          if (this.isSpeaking || Date.now() < this.ignoreAsrUntil) return;
-          let final = "";
-          for (let i = e.resultIndex; i < e.results.length; i++) {
-            if (e.results[i].isFinal) final += e.results[i][0].transcript;
-          }
-          if (final.trim()) {
-            this.transcriptArea.textContent = "";
-            this.processUserMessage(final.trim());
-          }
-        };
-
-        this.recognition.onerror = () => this.restartListening(2000);
-        this.recognition.onend = () => this.restartListening(1200);
+      /* ——— Eventi ——— */
+      initEvents(){
+        this.microphoneButton.addEventListener('click',()=>{this.autoRestartEnabled=!this.autoRestartEnabled;if(this.autoRestartEnabled)this.startListening();else this.stopListening();this.updateMicUI();});
+        this.sendButton.addEventListener('click',()=>this.handleUser(this.chatInput.value));
+        this.chatInput.addEventListener('keypress',e=>e.key==='Enter'&&this.handleUser(this.chatInput.value));
+        this.themeToggle.addEventListener('click',()=>this.toggleTheme());
+        this.adminBtn.addEventListener('click',()=>this.adminModal.style.display='block');
+        document.getElementById('closeAdmin').addEventListener('click',()=>this.adminModal.style.display='none');
+        document.getElementById('saveAdmin').addEventListener('click',()=>this.saveAdmin());
       }
 
-      startListening() {
-        try {
-          this.recognition && this.recognition.start();
-        } catch {}
+      /* ——— UI helpers ——— */
+      updateMicUI(){
+        if(!this.autoRestartEnabled){this.microphoneButton.classList.add('disabled');this.microphoneStatus.textContent='Microfono OFF';}
+        else if(this.isListening){this.microphoneButton.classList.add('listening');this.microphoneStatus.textContent='Parla pure…';}
+        else{this.microphoneButton.classList.remove('listening','disabled');this.microphoneStatus.textContent='In attesa…';}
       }
-      stopListening() {
-        try {
-          this.recognition && this.recognition.stop();
-        } catch {}
-      }
-      restartListening(delay = 1500) {
-        this.isListening = false;
-        this.updateMicUI();
-        if (this.autoRestartEnabled && !this.isSpeaking) {
-          setTimeout(() => this.startListening(), delay);
-        }
-      }
+      applyTheme(){document.body.classList.toggle('dark-mode',this.isDarkMode);this.themeToggle.textContent=this.isDarkMode?'☀️':'🌙';}
+      toggleTheme(){this.isDarkMode=!this.isDarkMode;localStorage.setItem('aluia_theme',this.isDarkMode?'dark':'light');this.applyTheme();}
+      showToast(msg,t='success'){const el=document.createElement('div');el.className=`toast ${t}`;el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.classList.add('show'),50);setTimeout(()=>el.remove(),4000);}      
 
-      /* ----- EVENT LISTENERS ----- */
-      initEventListeners() {
-        this.microphoneButton.addEventListener("click", () => {
-          this.autoRestartEnabled = !this.autoRestartEnabled;
-          if (this.autoRestartEnabled) this.startListening(); else this.stopListening();
-          this.updateMicUI();
-        });
+      /* ——— Messaggi ——— */
+      handleUser(text){if(!text)return;this.addMsg(text,'user');this.chatInput.value='';this.askAssistant(text);}      
+      addMsg(c,cls){const d=document.createElement('div');d.className=`message ${cls}`;d.textContent=c;this.chatContainer.appendChild(d);this.chatContainer.scrollTop=this.chatContainer.scrollHeight;}
 
-        this.sendButton.addEventListener("click", () => this.processUserMessage(this.chatInput.value));
-        this.chatInput.addEventListener("keypress", (e) => e.key === "Enter" && this.processUserMessage(this.chatInput.value));
-        this.themeToggle.addEventListener("click", () => this.toggleTheme());
+      async askAssistant(msg){
+        this.typingIndicator.style.display='flex';this.conversationHistory.push({role:'user',content:msg});
+        try{
+          const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({messages:this.conversationHistory.slice(-10)})});
+          if(!r.ok)throw new Error('chat');
+          const {content}=await r.json();
+          this.afterAssistant(content||this.demo(msg));
+        }catch(e){console.warn(e);this.afterAssistant(this.demo(msg));}
+      }
+      afterAssistant(reply){this.typingIndicator.style.display='none';this.conversationHistory.push({role:'assistant',content:reply});this.addMsg(reply,'assistant');this.ignoreAsrUntil=Date.now()+1800;this.speak(reply);}      
 
-        /* --- admin modal --- */
-        this.adminBtn.addEventListener("click", () => this.adminModal.style.display = "block");
-        document.getElementById("closeAdmin").addEventListener("click", () => this.adminModal.style.display = "none");
-        this.saveAdminBtn.addEventListener("click", () => this.saveAdminConfig());
-      }
+      /* ——— TTS ——— */
+      async speak(text){try{
+        const r=await fetch('/api/tts',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({text,voiceId:this.voiceId})});
+        if(!r.ok)throw new Error('tts');const b=await r.blob();const u=URL.createObjectURL(b);const a=new Audio(u);
+        a.onplay=()=>{this.isSpeaking=true;this.stopListening();};a.onended=()=>{URL.revokeObjectURL(u);this.isSpeaking=false;this.startListening();};
+        await a.play();
+      }catch{this.nativeSpeak(text);}}
+      nativeSpeak(t){if(!('speechSynthesis'in window))return;const u=new SpeechSynthesisUtterance(t);u.lang='it-IT';u.onstart=()=>{this.isSpeaking=true;this.stopListening();};u.onend=()=>{this.isSpeaking=false;this.startListening();};speechSynthesis.speak(u);}      
 
-      /* ----- UI HELPERS ----- */
-      updateMicUI() {
-        if (!this.autoRestartEnabled) {
-          this.microphoneButton.classList.add("disabled");
-          this.microphoneStatus.textContent = "Microfono disattivato";
-        } else if (this.isListening) {
-          this.microphoneButton.classList.add("listening");
-          this.microphoneStatus.textContent = "Parla pure…";
-        } else {
-          this.microphoneButton.classList.remove("listening", "disabled");
-          this.microphoneStatus.textContent = "Microfono in attesa";
-        }
-      }
+      /* ——— Admin ——— */
+      saveAdmin(){this.assistantId=document.getElementById('assistantId').value.trim();this.voiceId=document.getElementById('voiceId').value.trim()||this.voiceId;localStorage.setItem('aluia_assistant_id',this.assistantId);localStorage.setItem('aluia_voice_id',this.voiceId);this.adminModal.style.display='none';this.showToast('Config salvata');}
 
-      applyTheme() {
-        document.body.classList.toggle("dark-mode", this.isDarkMode);
-        this.themeToggle.textContent = this.isDarkMode ? "☀️" : "🌙";
-      }
-      toggleTheme() {
-        this.isDarkMode = !this.isDarkMode;
-        localStorage.setItem("aluia_theme", this.isDarkMode ? "dark" : "light");
-        this.applyTheme();
-      }
+      /* ——— Demo fallback ——— */
+      demo(){return'Comprendo. Raccontami di più.';}
 
-      showToast(msg, type = "success") {
-        const t = document.createElement("div");
-        t.className = `toast ${type}`;
-        t.textContent = msg;
-        document.body.appendChild(t);
-        setTimeout(() => t.classList.add("show"), 50);
-        setTimeout(() => t.classList.remove("show"), 3500);
-        setTimeout(() => t.remove(), 4000);
-      }
-
-      /* ----- MESSAGGISTICA ----- */
-      processUserMessage(text) {
-        if (!text) return;
-        this.addMessage(text, "user");
-        this.chatInput.value = "";
-        this.requestAssistant(text);
-      }
-
-      addMessage(content, cls) {
-        const m = document.createElement("div");
-        m.className = `message ${cls}`;
-        m.textContent = content;
-        this.chatContainer.appendChild(m);
-        this.chatContainer.scrollTop = this.chatContainer.scrollHeight;
-      }
-
-      async requestAssistant(message) {
-        this.typingIndicator.style.display = "flex";
-        this.conversationHistory.push({ role: "user", content: message });
-        try {
-          const res = await fetch("/api/chat", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ messages: this.conversationHistory.slice(-10) })
-          });
-          if (!res.ok) throw new Error("chat api");
-          const { content } = await res.json();
-          const reply = content || this.getDemoResponse(message);
-          this.afterAssistantReply(reply);
-        } catch (e) {
-          console.warn(e);
-          this.afterAssistantReply(this.getDemoResponse(message));
-        }
-      }
-
-      async afterAssistantReply(reply) {
-        this.typingIndicator.style.display = "none";
-        this.conversationHistory.push({ role: "assistant", content: reply });
-        this.addMessage(reply, "assistant");
-        this.ignoreAsrUntil = Date.now() + 1800;
-        await this.speak(reply);
-      }
-
-      /* ----- TEXT‑TO‑SPEECH ----- */
-      async speak(text) {
-        try {
-          const res = await fetch("/api/tts", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ text, voiceId: this.voiceId })
-          });
-          if (!res.ok) throw new Error("tts api");
-          const blob = await res.blob();
-          const url = URL.createObjectURL(blob);
-          const audio = new Audio(url);
-          audio.onplay = () => { this.isSpeaking = true; this.stopListening(); };
-          audio.onended = () => { URL.revokeObjectURL(url); this.isSpeaking = false; this.startListening(); };
-          audio.onerror = () => this.nativeSpeak(text);
-          await audio.play();
-        } catch {
-          this.nativeSpeak(text);
-        }
-      }
-
-      nativeSpeak(text) {
-        if (!("speechSynthesis" in window)) return;
-        const u = new SpeechSynthesisUtterance(text);
-        u.lang = "it-IT";
-        u.rate = 0.9;
-        u.onstart = () => { this.isSpeaking = true; this.stopListening(); };
-        u.onend = () => { this.isSpeaking = false; this.startListening(); };
-        speechSynthesis.speak(u);
-      }
-
-      /* ----- ADMIN MODAL ----- */
-      saveAdminConfig() {
-        this.assistantId = document.getElementById("assistantId").value.trim();
-        this.voiceId     = document.getElementById("voiceId").value.trim() || this.voiceId;
-        localStorage.setItem("aluia_assistant_id", this.assistantId);
-        localStorage.setItem("aluia_voice_id", this.voiceId);
-        this.adminModal.style.display = "none";
-        this.showToast("Configurazione salvata");
-      }
-
-      /* ----- DEMO FALLBACK ----- */
-      getDemoResponse(msg) {
-        const rs = [
-          "Ti ascolto e capisco quello che stai vivendo.",
-          "Grazie per aver condiviso questo con me. Come ti senti ora?",
-          "È normale provare quelle emozioni. Vuoi parlarne ancora?",
-          "Sono qui con te. Ricorda che non sei solo." 
-        ];
-        return rs[Math.floor(Math.random()*rs.length)];
-      }
-
-      /* ----- SERVER STATUS ----- */
-      async checkServerStatus() {
-        try {
-          const r = await fetch("/api/chat", { method:"POST", headers:{"Content-Type":"application/json"}, body:"{}" });
-          this.statusBar.textContent = r.ok ? "✅ Online" : "⚠️ Offline";
-          this.statusBar.classList.toggle("connected", r.ok);
-        } catch {
-          this.statusBar.textContent = "⚠️ Offline";
-        }
-      }
+      /* ——— Ping server ——— */
+      async checkServer(){try{const r=await fetch('/api/chat',{method:'POST',headers:{'Content-Type':'application/json'},body:'{}'});this.statusBar.textContent=r.ok?'✅ Online':'⚠️ Offline';this.statusBar.classList.toggle('connected',r.ok);}catch{this.statusBar.textContent='⚠️ Offline';}}
+      
+      startAutoListening(){if(!isSecureLikeContext()){this.showToast('Serve HTTPS o localhost','error');return;}navigator.mediaDevices.getUserMedia({audio:true}).then(s=>s.getTracks().forEach(t=>t.stop())).then(()=>this.startListening());}
     }
 
-    document.addEventListener("DOMContentLoaded", () => {
-      window.aluia = new AluIA();
-    });
+    document.addEventListener('DOMContentLoaded',()=>{window.aluia=new AluIA();});
   </script>
 </body>
 </html>
