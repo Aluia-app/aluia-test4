@@ -581,82 +581,100 @@
       }
 
       async sendToAssistant(message){
-        this.showTyping();
-        try{
-          this.conversationHistory.push({role:'user',content:message});
-          const res = await fetch('/api/chat',{
-            method:'POST',
-            headers:{'Content-Type':'application/json','Accept':'application/json'},
-            body:JSON.stringify({
-              messages:this.conversationHistory.slice(-10),
-              assistantId:this.assistantId || undefined
-            })
-          });
-          if(!res.ok){
-            this.setStatus('error','❌ Errore chat: ' + res.status);
-            throw new Error('API Error ' + res.status);
-          }
-          const data = await res.json();
-          // accetta più formati
-          const response =
-              data?.content ??
-              data?.message ??
-              data?.reply ??
-              (Array.isArray(data?.choices) ? data.choices?.[0]?.message?.content : undefined) ??
-              this.getDemoResponse(message);
+  this.showTyping();
+  try{
+    this.conversationHistory.push({ role:'user', content: message });
 
-          this.setStatus('connected','✅ Connesso a GPT');
-          this.conversationHistory.push({role:'assistant',content:response});
-          this.hideTyping();
-          this.addMessage(response,'assistant');
+    // Usa EDV.chat se presente, altrimenti fallback al fetch diretto
+    let edvResult;
+    if (window.EDV && EDV.chat) {
+      edvResult = await EDV.chat({
+        messages: this.conversationHistory.slice(-10),
+        assistantId: this.assistantId || undefined
+      });
+    } else {
+      const res = await fetch('/api/chat', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json', 'Accept':'application/json' },
+        body: JSON.stringify({
+          messages: this.conversationHistory.slice(-10),
+          assistantId: this.assistantId || undefined
+        })
+      });
+      if(!res.ok) throw new Error('API Error ' + res.status);
+      const data = await res.json();
+      edvResult = {
+        raw: data,
+        content: data?.content ?? data?.message ?? data?.reply ??
+                 (Array.isArray(data?.choices) ? data.choices?.[0]?.message?.content : undefined)
+      };
+    }
 
-          // TTS
-          this.ignoreAsrUntil = Date.now() + 2000;
-          await this.speakWithElevenLabs(response);
+    const response = edvResult.content || this.getDemoResponse(message);
 
-          if(this.conversationHistory.length>40){
-            this.conversationHistory = this.conversationHistory.slice(-20);
-          }
-        }catch(err){
-          console.warn('sendToAssistant error:',err);
-          this.hideTyping();
-          const fallback = this.getDemoResponse(message);
-          this.addMessage(fallback,'assistant');
-          this.ignoreAsrUntil = Date.now() + 2000;
-          this.speakWithNativeTTS(fallback);
-          if(String(err).includes('Failed to fetch') || String(err).includes('API Error')){
-            this.setStatus('error','❌ Backend chat non raggiungibile');
-            this.showToast('Endpoint /api/chat non raggiungibile. Controlla il server.', 'error');
-          }
-        }
-      }
+    this.setStatus('connected','✅ Connesso a GPT');
+    this.conversationHistory.push({ role:'assistant', content: response });
+    this.hideTyping();
+    this.addMessage(response,'assistant');
 
+    // TTS
+    this.ignoreAsrUntil = Date.now() + 2000;
+    await this.speakWithElevenLabs(response);
+
+    if (this.conversationHistory.length > 40) {
+      this.conversationHistory = this.conversationHistory.slice(-20);
+    }
+  } catch (err){
+    console.warn('sendToAssistant error:', err);
+    this.hideTyping();
+    const fallback = this.getDemoResponse(message);
+    this.addMessage(fallback,'assistant');
+    this.ignoreAsrUntil = Date.now() + 2000;
+    this.speakWithNativeTTS(fallback);
+    this.setStatus('error','❌ Backend chat non raggiungibile');
+    this.showToast('Endpoint /api/chat non raggiungibile o errore di rete','error');
+  }
+}
       // ===== TTS
       async speakWithElevenLabs(text){
-        try{
-          const cleanText = (text||'').replace(/[🔥💙✅❌⚠️🆘🎤💬🔒]/g,'').trim() || ' ';
-          const res = await fetch('/api/tts',{
-            method:'POST',
-            headers:{'Content-Type':'application/json'},
-            body:JSON.stringify({text:cleanText,voiceId:this.voiceId||undefined})
-          });
-          if(!res.ok) throw new Error('TTS API ' + res.status);
-          const audioBlob = await res.blob();
-          const url = URL.createObjectURL(audioBlob);
-          const audio = new Audio(url);
-          audio.volume = 0.8;
-          audio.onplay = ()=>{ this.isSpeaking=true; this.pauseRecognition(); };
-          audio.onended = ()=>{ URL.revokeObjectURL(url); this.isSpeaking=false; this.resumeRecognitionSafe(); };
-          audio.onerror = ()=>{ URL.revokeObjectURL(url); this.isSpeaking=false; this.resumeRecognitionSafe(); this.speakWithNativeTTS(text); };
-          await audio.play();
-          this.setStatus('elevenlabs','🔊 Voce ElevenLabs attiva');
-        }catch(e){
-          console.warn('TTS error, uso voce nativa:',e);
-          this.speakWithNativeTTS(text);
-          this.showToast('Voce esterna non disponibile: uso quella di sistema','error');
-        }
-      }
+  try{
+    const cleanText = (text||'').replace(/[🔥💙✅❌⚠️🆘🎤💬🔒]/g,'').trim() || ' ';
 
+    // Usa EDV.tts se presente, altrimenti fallback al fetch diretto
+    let audioBlob;
+    if (window.EDV && EDV.tts) {
+      audioBlob = await EDV.tts({ text: cleanText, voiceId: this.voiceId || undefined });
+    } else {
+      const res = await fetch('/api/tts', {
+        method:'POST',
+        headers:{ 'Content-Type':'application/json' },
+        body: JSON.stringify({ text: cleanText, voiceId: this.voiceId || undefined })
+      });
+      if(!res.ok) throw new Error('TTS API ' + res.status);
+      audioBlob = await res.blob();
+    }
+
+    const url = URL.createObjectURL(audioBlob);
+    const audio = new Audio(url);
+    audio.volume = 0.8;
+
+    audio.onplay  = () => { this.isSpeaking = true; this.pauseRecognition(); };
+    audio.onended = () => { URL.revokeObjectURL(url); this.isSpeaking = false; this.resumeRecognitionSafe(); };
+    audio.onerror = () => {
+      URL.revokeObjectURL(url);
+      this.isSpeaking = false;
+      this.resumeRecognitionSafe();
+      this.speakWithNativeTTS(text);
+    };
+
+    await audio.play();
+    this.setStatus('elevenlabs','🔊 Voce ElevenLabs attiva');
+  } catch(e){
+    console.warn('TTS error, uso voce nativa:', e);
+    this.speakWithNativeTTS(text);
+    this.showToast('Voce esterna non disponibile: uso quella di sistema','error');
+  }
+}
       initVoicesOnce(){
         if(!('speechSynthesis' in window)) return;
         const assign = ()=>{
