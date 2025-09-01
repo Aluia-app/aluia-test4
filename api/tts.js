@@ -1,4 +1,4 @@
-// /api/tts.js - Versione con OpenAI TTS e voce Sage
+// /api/tts.js - Versione con OpenAI TTS e voce Nova
 module.exports = async (req, res) => {
   // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
   }
 
   // Voce Sage come default, o quella specificata dall'utente
-  const selectedVoice = voiceId || 'nova';;
+  const selectedVoice = voiceId || 'nova';
   
   // Pulizia testo per TTS (rimuovi emoji e caratteri speciali)
   const cleanText = text
