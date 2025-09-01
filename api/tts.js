@@ -42,7 +42,7 @@ module.exports = async (req, res) => {
   }
 
   // Voce Sage come default, o quella specificata dall'utente
-  const selectedVoice = voiceId || 'sage';
+  const selectedVoice = voiceId || 'nova';;
   
   // Pulizia testo per TTS (rimuovi emoji e caratteri speciali)
   const cleanText = text
