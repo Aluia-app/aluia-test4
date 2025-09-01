@@ -1,11 +1,10 @@
-// /api/tts.js - Implementazione completa con ElevenLabs
+// /api/tts.js - Versione con OpenAI TTS e voce Sage
 module.exports = async (req, res) => {
-  // CORS headers per permettere richieste cross-origin
+  // CORS headers
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, Accept');
   
-  // Gestione preflight OPTIONS
   if (req.method === 'OPTIONS') {
     return res.status(200).end();
   }
@@ -29,71 +28,73 @@ module.exports = async (req, res) => {
     return res.status(400).json({ error: 'Text parameter required' });
   }
 
-  // Limitare la lunghezza del testo per evitare costi eccessivi
-  if (text.length > 5000) {
-    return res.status(400).json({ error: 'Text too long (max 5000 characters)' });
+  // Limitare la lunghezza del testo per controllo costi
+  if (text.length > 4000) {
+    return res.status(400).json({ error: 'Text too long (max 4000 characters)' });
   }
 
-  const ELEVENLABS_API_KEY = process.env.ELEVENLABS_API_KEY;
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
   
-  if (!ELEVENLABS_API_KEY) {
-    console.warn('ELEVENLABS_API_KEY non configurata, usando fallback');
-    // Fallback: ritorna un audio silenzioso o un messaggio di errore
+  if (!OPENAI_API_KEY) {
+    console.warn('OPENAI_API_KEY non configurata, usando fallback');
     res.setHeader('content-type', 'text/plain; charset=utf-8');
     return res.status(200).send('TTS non disponibile: API key non configurata');
   }
 
-  // Voice ID di default per italiano (Rachel o altro)
-  const defaultVoiceId = 'EXAVITQu4vr4xnSDxMaL'; // Bella (italiano)
-  const selectedVoiceId = voiceId || process.env.ELEVENLABS_VOICE_ID || defaultVoiceId;
+  // Voce Sage come default, o quella specificata dall'utente
+  const selectedVoice = voiceId || 'sage';
+  
+  // Pulizia testo per TTS (rimuovi emoji e caratteri speciali)
+  const cleanText = text
+    .replace(/[🔥💙✅❌⚠️🆘🎤💬🔒👋❤️🌍🚨🛡️🏥💚🤝📞]/g, '')
+    .replace(/\*\*(.*?)\*\*/g, '$1') // Rimuovi markdown bold
+    .replace(/\*(.*?)\*/g, '$1')     // Rimuovi markdown italic
+    .trim() || 'Messaggio vuoto';
 
   try {
-    // Chiamata a ElevenLabs API
-    const elevenLabsResponse = await fetch(`https://api.elevenlabs.io/v1/text-to-speech/${selectedVoiceId}`, {
+    // Chiamata a OpenAI TTS API
+    const openaiResponse = await fetch('https://api.openai.com/v1/audio/speech', {
       method: 'POST',
       headers: {
-        'Accept': 'audio/mpeg',
-        'Content-Type': 'application/json',
-        'xi-api-key': ELEVENLABS_API_KEY
+        'Authorization': `Bearer ${OPENAI_API_KEY}`,
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
-        text: text,
-        model_id: 'eleven_multilingual_v2', // Supporta italiano
-        voice_settings: {
-          stability: 0.5,
-          similarity_boost: 0.75,
-          style: 0.0,
-          use_speaker_boost: true
-        }
+        model: 'tts-1', // Modello standard (più economico di tts-1-hd)
+        input: cleanText,
+        voice: selectedVoice, // sage, alloy, echo, fable, nova, onyx, shimmer
+        response_format: 'mp3',
+        speed: 1.0 // Velocità normale
       })
     });
 
-    if (!elevenLabsResponse.ok) {
-      const errorText = await elevenLabsResponse.text().catch(() => '');
-      console.error(`ElevenLabs API error ${elevenLabsResponse.status}:`, errorText);
+    if (!openaiResponse.ok) {
+      const errorText = await openaiResponse.text().catch(() => '');
+      console.error(`OpenAI TTS error ${openaiResponse.status}:`, errorText);
       
       // Gestione errori specifici
-      if (elevenLabsResponse.status === 401) {
-        return res.status(500).json({ error: 'API key ElevenLabs non valida' });
-      } else if (elevenLabsResponse.status === 429) {
-        return res.status(500).json({ error: 'Limite rate ElevenLabs raggiunto' });
-      } else if (elevenLabsResponse.status === 422) {
+      if (openaiResponse.status === 401) {
+        return res.status(500).json({ error: 'API key OpenAI non valida' });
+      } else if (openaiResponse.status === 429) {
+        return res.status(500).json({ error: 'Limite rate OpenAI raggiunto' });
+      } else if (openaiResponse.status === 400) {
         return res.status(400).json({ error: 'Testo non valido per TTS' });
       } else {
-        return res.status(500).json({ error: 'Errore del servizio TTS' });
+        return res.status(500).json({ error: 'Errore del servizio TTS OpenAI' });
       }
     }
 
     // Ritorna l'audio blob
-    const audioBuffer = await elevenLabsResponse.arrayBuffer();
+    const audioBuffer = await openaiResponse.arrayBuffer();
     
     res.setHeader('Content-Type', 'audio/mpeg');
     res.setHeader('Content-Length', audioBuffer.byteLength.toString());
+    res.setHeader('Cache-Control', 'public, max-age=3600'); // Cache per 1 ora
     
     return res.status(200).send(Buffer.from(audioBuffer));
 
   } catch (error) {
-    console.error('TTS API error:', error);
+    console.error('OpenAI TTS error:', error);
     
     // Fallback in caso di errore di rete
     res.setHeader('content-type', 'text/plain; charset=utf-8');
